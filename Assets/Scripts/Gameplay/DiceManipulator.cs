@@ -23,6 +23,21 @@ public class DiceManipulator : MonoBehaviour
     private bool isDragging = false;
     private float shakeTimer;
 
+    private void Awake()
+    {
+        EventsManager.AddSubscriber<OnTurnStart>(TryBotPlay);
+    }
+
+    private void OnDestroy()
+    {
+        EventsManager.RemoveSubscriber<OnTurnStart>(TryBotPlay);
+    }
+
+    private void Start()
+    {
+        mainCam = Camera.main;
+        pointerAction = inputActions.FindAction("Pointer");
+    }
 
     protected virtual void Drop()
     {
@@ -69,10 +84,11 @@ public class DiceManipulator : MonoBehaviour
         inputActions.Disable();
     }
 
-    private void Start()
+    private void TryBotPlay(OnTurnStart evt)
     {
-        mainCam = Camera.main;
-        pointerAction = inputActions.FindAction("Pointer");
+        if (!evt.currentActor.IsBot) return;
+
+        Drop();
     }
 
     private Vector3 GetPointerWorldPosition()

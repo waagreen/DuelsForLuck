@@ -38,20 +38,20 @@ public class Die : MonoBehaviour
     public event System.Action OnGrab;
     public event System.Action OnDrop;
 
-    private void UpdateTurnVisuals(OnTurnChange evt)
+    private void UpdateTurnVisuals(OnImmediateTurnChange evt)
     {
-        cachedColor = evt.turnOrder == Order.First ? Player.P1Color : Player.P2Color;    
+        cachedColor = (evt.turnIndex == 0) ? Actor.PColor : Actor.BotColor;    
         ColorFaces(cachedColor);
     }
 
     private void Awake()
     {
-        EventsManager.AddSubscriber<OnTurnChange>(UpdateTurnVisuals);
+        EventsManager.AddSubscriber<OnImmediateTurnChange>(UpdateTurnVisuals);
     }
 
     private void OnDestroy()
     {
-        EventsManager.RemoveSubscriber<OnTurnChange>(UpdateTurnVisuals);
+        EventsManager.RemoveSubscriber<OnImmediateTurnChange>(UpdateTurnVisuals);
     }
 
     private void Start()

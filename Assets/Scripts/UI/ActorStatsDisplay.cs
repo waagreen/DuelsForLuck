@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerStatsDisplay : MonoBehaviour
+public class ActorStatsDisplay : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private TMP_Text healthText;
@@ -12,15 +12,15 @@ public class PlayerStatsDisplay : MonoBehaviour
     [SerializeField] private List<Image> winIndicators;
 
     [Header("Focus Settings")]
-    [SerializeField] private Order ownerOrder;
+    [SerializeField] private int ownerOrder;
     [SerializeField][Min(0f)] private float focusedSize = 1.2f, unfocusedSize = 0.8f, focusTime = 1f;
 
     private Sequence focusSeq, damageSeq, healSeq;
     private int cachedHealth;
 
-    private void UpdateDisplay(OnPlayerHealthChange evt)
+    private void UpdateDisplay(OnActorHealthChange evt)
     {
-        if (evt.turnOrder == null || evt.turnOrder.Value != ownerOrder) return;
+        if ((evt.turnIndex != null) && (evt.turnIndex.Value != ownerOrder)) return;
 
         int previousHealth = cachedHealth;
         
@@ -46,12 +46,12 @@ public class PlayerStatsDisplay : MonoBehaviour
         // TODO: IMPLEMENT FOR HEALING DICES
     }
 
-    private void UpdateState(OnTurnChange evt)
+    private void UpdateState(OnImmediateTurnChange evt)
     {
         focusSeq?.Kill();
         focusSeq = DOTween.Sequence();
 
-        bool isFocus = evt.turnOrder == ownerOrder;
+        bool isFocus = evt.turnIndex == ownerOrder;
         Vector3 targetScale = (isFocus ? focusedSize : unfocusedSize) * Vector3.one;
         float fadeValue = isFocus ? 0f : 0.5f;
 
@@ -61,26 +61,26 @@ public class PlayerStatsDisplay : MonoBehaviour
         focusSeq.Play();
     }
 
-    private void Setup(OnCreatePlayer evt)
+    private void Setup(OnCreateActor evt)
     {
-        if (evt.newPlayer.Order != ownerOrder) return;
+        if (evt.newActor.Order != ownerOrder) return;
 
-        cachedHealth = evt.newPlayer.Health;
+        cachedHealth = evt.newActor.Health;
         healthText.SetText(cachedHealth.ToString());
     }
 
     private void Awake()
     {
-        EventsManager.AddSubscriber<OnPlayerHealthChange>(UpdateDisplay);
-        EventsManager.AddSubscriber<OnTurnChange>(UpdateState);
-        EventsManager.AddSubscriber<OnCreatePlayer>(Setup);
+        EventsManager.AddSubscriber<OnActorHealthChange>(UpdateDisplay);
+        EventsManager.AddSubscriber<OnImmediateTurnChange>(UpdateState);
+        EventsManager.AddSubscriber<OnCreateActor>(Setup);
 
     }
 
     private void OnDestroy()
     {
-        EventsManager.RemoveSubscriber<OnPlayerHealthChange>(UpdateDisplay);
-        EventsManager.RemoveSubscriber<OnTurnChange>(UpdateState);
-        EventsManager.RemoveSubscriber<OnCreatePlayer>(Setup);
+        EventsManager.RemoveSubscriber<OnActorHealthChange>(UpdateDisplay);
+        EventsManager.RemoveSubscriber<OnImmediateTurnChange>(UpdateState);
+        EventsManager.RemoveSubscriber<OnCreateActor>(Setup);
     }
 }

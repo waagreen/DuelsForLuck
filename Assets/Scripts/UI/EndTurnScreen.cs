@@ -9,7 +9,7 @@ public class EndTurnScreen : MonoBehaviour
 
     private void UpdateMessage(OnRoundEnd evt)
     {
-        string winner = evt.winner == Order.First ? "<color=#3B8ACC>BLUE</color>" : "<color=#CC3B8A>RED</color>";
+        string winner = (evt.winner == 0) ? "<color=#3B8ACC>BLUE</color>" : "<color=#CC3B8A>RED</color>";
         message.SetText($"{winner} Win! \n\nFirst to wins two rounds \ntakes the game");
 
         messageSeq?.Kill();
@@ -20,7 +20,7 @@ public class EndTurnScreen : MonoBehaviour
         messageSeq.Append(transform.DOScale(Vector3.zero, 0.1f).SetEase(Ease.OutCubic));
         messageSeq.AppendCallback(() =>
         {
-            EventsManager.Broadcast(new OnResetTurn());
+            EventsManager.Broadcast(new OnNextRound());
         });
         messageSeq.Play();
     }

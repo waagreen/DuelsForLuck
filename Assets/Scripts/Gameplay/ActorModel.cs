@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public class PlayerModel : MonoBehaviour
+public class ActorModel : MonoBehaviour
 {
     [SerializeField] private AudioSource audioScr;
     [SerializeField] private List<MeshRenderer> meshes;

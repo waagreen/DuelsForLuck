@@ -2,12 +2,6 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public enum Order
-{
-    First = 0,
-    Second = 1
-}
-
 public struct DieRoll
 {
     public int value;
@@ -20,15 +14,15 @@ public class Battle : MonoBehaviour
     [SerializeField] private BattleDisplay p1Display, p2Display;
     [SerializeField] private int initalPlayersHealth = 10, initialDiceAmount = 2;
 
-    private Player p1 = null;
-    private Player p2 = null;
-    private Order turn;
+    private Actor p1 = null;
+    private Actor p2 = null;
+    private int turnIndex;
     private List<DieRoll> turnResults;
 
     private Sequence turnResolveSeq;
 
-    private Player GetActivePlayer() => (turn == Order.First) ? p1 : p2;
-    private Player GetOpposingPlayer() => (turn == Order.First) ? p2 : p1;
+    private Actor GetActiveActor() => (turnIndex == 0) ? p1 : p2;
+    private Actor GetOpposingActor() => (turnIndex == 1) ? p2 : p1;
     private int GetDamage(int value)
     {
         if (value == 1) return 0;
@@ -39,50 +33,49 @@ public class Battle : MonoBehaviour
     private void Awake()
     {
         EventsManager.AddSubscriber<OnDieResult>(HandleDieResult);
-        EventsManager.AddSubscriber<OnResetTurn>(ResetTurnFromLoser);
+        EventsManager.AddSubscriber<OnNextRound>(ResetForNextRound);
     }
 
     private void OnDestroy()
     {
         EventsManager.RemoveSubscriber<OnDieResult>(HandleDieResult);
-        EventsManager.RemoveSubscriber<OnResetTurn>(ResetTurnFromLoser);
+        EventsManager.RemoveSubscriber<OnNextRound>(ResetForNextRound);
     }
-    
+
     private void Start()
     {
-        p1 = new(Order.First, initalPlayersHealth, initialDiceAmount);
-        p2 = new(Order.Second, initalPlayersHealth, initialDiceAmount);
-
+        turnIndex = 0;
         turnResults = new();
-        InitTurns(Order.First);
+        
+        p1 = new(turnIndex, initalPlayersHealth, initialDiceAmount, false);
+        p2 = new(turnIndex + 1, initalPlayersHealth, initialDiceAmount, true);
 
-        EventsManager.Broadcast(new OnCreatePlayer() {newPlayer = p1});
-        EventsManager.Broadcast(new OnCreatePlayer() {newPlayer = p2});
+        InitTurns(turnIndex);
+
+        EventsManager.Broadcast(new OnCreateActor() { newActor = p1 });
+        EventsManager.Broadcast(new OnCreateActor() { newActor = p2 });
     }
 
-    private void CheckGameStatus()
+    private void InitTurns(int forceOrder)
     {
-        if (p1.WinnedTheGame || p2.WinnedTheGame)
-        {
-            EventsManager.Broadcast(new OnGameEnd { winner = p1.WinnedTheGame ? p1 : p2 });
-        }
-        else
-        {
-            // No one reached 2 wins, we go the the next round.
+        // Enforce the current player
+        turnIndex = forceOrder;
+        float orbitAngle = (turnIndex == 0) ? 180f : 0f;
 
-            p1.Health = initalPlayersHealth;
-            p2.Health = initalPlayersHealth;
+        turnResolveSeq?.Kill();
+        turnResolveSeq = DOTween.Sequence();
+        turnResolveSeq.AppendCallback(BroadcastTurnChange);
+        turnResolveSeq.AppendInterval(1f);
+        turnResolveSeq.Append(orbitCamera.OrbitToAngle(orbitAngle, 1.5f).SetEase(Ease.InOutSine));
+        turnResolveSeq.AppendInterval(0.2f);
+        turnResolveSeq.Append(orbitCamera.AdjustViewAngle(45f, 0.7f).SetEase(Ease.OutBack));
+        turnResolveSeq.Play();
+    }
 
-            Player winner = p1.Health <= 0 ? p2 : p1;
-            winner.WinRound();
-
-            // At this point the turn already progressed, so the winner is the previous player
-            turnResolveSeq.AppendCallback(() =>
-            {
-                EventsManager.Broadcast(new OnRoundEnd { winner = turn == Order.First ? Order.Second : Order.First });
-            });
-            turnResolveSeq.Play();
-        }
+    private void ResetForNextRound(OnNextRound evt)
+    {
+        EventsManager.Broadcast(new OnActorHealthChange { dealtaHealth = initalPlayersHealth });
+        InitTurns(turnIndex);
     }
 
     private void HandleDieResult(OnDieResult evt)
@@ -94,9 +87,9 @@ public class Battle : MonoBehaviour
         };
         turnResults.Add(roll);
 
-        if (turnResults.Count != GetActivePlayer().DiceAmount) return;
+        if (turnResults.Count != GetActiveActor().DiceAmount) return;
 
-        Player opposing = GetOpposingPlayer();
+        Actor opposing = GetOpposingActor();
         foreach (DieRoll value in turnResults)
         {
             opposing.Health -= value.damage;
@@ -105,44 +98,10 @@ public class Battle : MonoBehaviour
         ResolveTurn();
     }
 
-    private void BroadcastTurn()
-    {
-        EventsManager.Broadcast(new OnTurnChange() { turnOrder = turn });
-    }
-
-    private void TurnResolveFeedback()
-    {
-        // This represents the player who will play this new turn 
-        BattleDisplay battleDisplay = turn == Order.First ? p1Display : p2Display;
-
-        turnResolveSeq?.Kill();
-        turnResolveSeq = DOTween.Sequence();
-
-        // Look to the opposing player
-        turnResolveSeq.AppendInterval(0.2f);
-        turnResolveSeq.Append(orbitCamera.AdjustViewAngle(0f, 0.6f).SetEase(Ease.OutBack));
-        turnResolveSeq.AppendCallback(BroadcastTurn);
-        turnResolveSeq.AppendInterval(0.5f);
-
-        // Show the dice results 
-        turnResolveSeq.Append(battleDisplay.DamageFeedbackSequence(turnResults, turn));
-    }
-    
-    private void NextTurnFeedback()
-    {
-        float orbitAngle = turn == Order.First ? 180f : 0f;
-
-        // Camera moves to the perspective of next player
-        turnResolveSeq.Append(orbitCamera.OrbitToAngle(orbitAngle, 1f).SetEase(Ease.InOutSine));
-        turnResolveSeq.AppendInterval(0.2f);
-        turnResolveSeq.Append(orbitCamera.AdjustViewAngle(45f, 0.6f).SetEase(Ease.InBack));
-        turnResolveSeq.Play();
-    }
-
     private void ResolveTurn()
     {
         // Toggle between players
-        turn = (Order)(((int)turn + 1) % 2);
+        turnIndex = (turnIndex + 1) % 2;
 
         TurnResolveFeedback();
         turnResults.Clear();
@@ -157,25 +116,63 @@ public class Battle : MonoBehaviour
         }
     }
 
-    private void ResetTurnFromLoser(OnResetTurn evt)
-    {
-        EventsManager.Broadcast(new OnPlayerHealthChange { dealtaHealth = initalPlayersHealth });
-        InitTurns(turn);
-    }
+    private void BroadcastTurnChange() => EventsManager.Broadcast(new OnImmediateTurnChange() { turnIndex = turnIndex });
+    private void BroadcastTurnStart() => EventsManager.Broadcast(new OnTurnStart() { currentActor = GetActiveActor() });
 
-    private void InitTurns(Order forceOrder)
+    // Always called between turns to display the dice results
+    private void TurnResolveFeedback()
     {
-        // Enforce the current player
-        turn = forceOrder;
-        float orbitAngle = turn == Order.First ? 180f : 0f;
+        // This represents the actor who will play this new turn 
+        BattleDisplay battleDisplay = (turnIndex == 0) ? p1Display : p2Display;
 
         turnResolveSeq?.Kill();
         turnResolveSeq = DOTween.Sequence();
-        turnResolveSeq.AppendCallback(BroadcastTurn);
-        turnResolveSeq.AppendInterval(1f);
-        turnResolveSeq.Append(orbitCamera.OrbitToAngle(orbitAngle, 1.5f).SetEase(Ease.InOutSine));
+
+        // Look to the opposing actor
         turnResolveSeq.AppendInterval(0.2f);
-        turnResolveSeq.Append(orbitCamera.AdjustViewAngle(45f, 0.7f).SetEase(Ease.OutBack));
+        turnResolveSeq.Append(orbitCamera.AdjustViewAngle(0f, 0.6f).SetEase(Ease.OutBack));
+        turnResolveSeq.AppendCallback(BroadcastTurnChange);
+        turnResolveSeq.AppendInterval(0.5f);
+
+        // Show the dice results 
+        turnResolveSeq.Append(battleDisplay.DamageFeedbackSequence(turnResults, turnIndex));
+    }
+    
+    // Only called when both actors have some health left
+    private void NextTurnFeedback()
+    {
+        float orbitAngle = (turnIndex == 0) ? 180f : 0f;
+
+        // Camera moves to the perspective of next player
+        turnResolveSeq.Append(orbitCamera.OrbitToAngle(orbitAngle, 1f).SetEase(Ease.InOutSine));
+        turnResolveSeq.AppendInterval(0.2f);
+        turnResolveSeq.Append(orbitCamera.AdjustViewAngle(45f, 0.6f).SetEase(Ease.InBack));
+        turnResolveSeq.AppendCallback(BroadcastTurnStart);
         turnResolveSeq.Play();
+    }
+
+    // Only called when one of the actors has taken fatal damage
+    private void CheckGameStatus()
+    {
+        if (p1.IsWinner() || p2.IsWinner())
+        {
+            EventsManager.Broadcast(new OnGameEnd { winner = p1.IsWinner() ? p1 : p2 });
+        }
+        else
+        {
+            // No one reached 2 wins, we go the the next round.
+            p1.Health = initalPlayersHealth;
+            p2.Health = initalPlayersHealth;
+
+            Actor winner = p1.Health <= 0 ? p2 : p1;
+            winner.WinRound();
+
+            // At this point the turn already progressed, so the winner is the previous player
+            turnResolveSeq.AppendCallback(() =>
+            {
+                EventsManager.Broadcast(new OnRoundEnd { winner = (turnIndex + 1) % 2 });
+            });
+            turnResolveSeq.Play();
+        }
     }
 }

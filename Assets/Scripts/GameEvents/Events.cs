@@ -1,26 +1,5 @@
 public class GameEvent { }
 
-public class OnDieResult : GameEvent
-{
-    public int result;
-}
-
-public class OnCreatePlayer : GameEvent
-{
-    public Player newPlayer;
-}
-
-public class OnPlayerHealthChange : GameEvent
-{
-    public int dealtaHealth;
-    public Order? turnOrder;
-}
-
-public class OnTurnChange : GameEvent
-{
-    public Order turnOrder;
-}
-
 public class OnCameraShake : GameEvent
 {
     public float duration;
@@ -29,17 +8,48 @@ public class OnCameraShake : GameEvent
     public float randomness = 90;
 }
 
+public class OnDieResult : GameEvent
+{
+    public int result;
+}
+
+public class OnCreateActor : GameEvent
+{
+    public Actor newActor;
+}
+
+public class OnActorHealthChange : GameEvent
+{
+    public int dealtaHealth;
+    public int? turnIndex;
+}
+
+public class OnImmediateTurnChange : GameEvent
+{
+    public int turnIndex;
+}
+
+public class OnTurnStart : GameEvent
+{
+    public Actor currentActor;
+}
+
 public class OnRoundEnd : GameEvent
 {
-    public Order winner;
+    public int winner;
 }
 
 public class OnGameEnd : GameEvent
 {
-    public Player winner;
+    public Actor winner;
 }
 
-public class OnResetTurn : GameEvent
+public class OnNextRound : GameEvent
+{
+
+}
+
+public class OnBotPlay : GameEvent
 {
     
 }

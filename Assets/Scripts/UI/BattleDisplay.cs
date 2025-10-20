@@ -8,8 +8,8 @@ public class BattleDisplay : MonoBehaviour
     [SerializeField] private Canvas display;
     [SerializeField] private RectTransform diceHolder;
     [SerializeField] private DieDisplay diePrefab;
-    [SerializeField] private PlayerModel model;
-    [SerializeField] private Order damageFrom;
+    [SerializeField] private ActorModel model;
+    [SerializeField][Range(0, 1)] private int damageFrom;
 
     private List<DieDisplay> diceRepresentation;
     private Sequence damageSequence;
@@ -21,7 +21,7 @@ public class BattleDisplay : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             DieDisplay die = Instantiate(diePrefab, diceHolder);
-            die.VisualSetup(damageFrom == Order.First ? Player.P1Color : Player.P2Color);
+            die.VisualSetup((damageFrom == 0) ? Actor.PColor : Actor.BotColor);
             diceRepresentation.Add(die);
         }
     }
@@ -34,10 +34,10 @@ public class BattleDisplay : MonoBehaviour
         }
     }
 
-    private void BroadcastHealth(int damage, Order damagedPlayer)
+    private void BroadcastHealth(int damage, int damagedActor)
     {
-        // Since this is called after changing the turn order, we pass the active player's health, since they received damage last turn
-        EventsManager.Broadcast(new OnPlayerHealthChange() { turnOrder = damagedPlayer, dealtaHealth = -damage });
+        // Since this is called after changing the turn order, we pass the active actors's health, since they received damage last turn
+        EventsManager.Broadcast(new OnActorHealthChange() { turnIndex = damagedActor, dealtaHealth = -damage });
     }
 
     private void BroadcastCameraShake(float duration, int damage)
@@ -54,7 +54,7 @@ public class BattleDisplay : MonoBehaviour
         EventsManager.Broadcast(shake);
     }
 
-    public Sequence DamageFeedbackSequence(List<DieRoll> turnResults, Order damagedPlayer)
+    public Sequence DamageFeedbackSequence(List<DieRoll> turnResults, int damagedActor)
     {
         damageSequence?.Kill();
         damageSequence = DOTween.Sequence();
@@ -70,7 +70,7 @@ public class BattleDisplay : MonoBehaviour
             // Face value of 1 represents zero damage
             if (roll.value > 1)
             {
-                damageSequence.JoinCallback(() => BroadcastHealth(roll.damage, damagedPlayer));
+                damageSequence.JoinCallback(() => BroadcastHealth(roll.damage, damagedActor));
                 damageSequence.Join(model.Hurt());
                 damageSequence.JoinCallback(() => BroadcastCameraShake(0.1f, roll.damage));
             }
