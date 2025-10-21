@@ -19,7 +19,7 @@ public class Battle : MonoBehaviour
     private List<DieRoll> turnResults;
 
     private Actor GetActiveActor() => (turnIndex == 0) ? p1 : p2;
-    private Actor GetPassiveActor() => (turnIndex == 1) ? p2 : p1;
+    private Actor GetPassiveActor() => (turnIndex == 0) ? p2 : p1;
     private int GetDamage(int value)
     {
         if (value == 1) return 0;
@@ -51,6 +51,8 @@ public class Battle : MonoBehaviour
 
         EventsManager.Broadcast(new OnCreateActor() { newActor = p1 });
         EventsManager.Broadcast(new OnCreateActor() { newActor = p2 });
+
+        BroadcastTurnStart();
     }
 
     private void OnVisualsComplete(OnTurnVisualsComplete evt)
@@ -89,7 +91,7 @@ public class Battle : MonoBehaviour
     private IEnumerator ResolveTurnSequence()
     {
         isVisualsPlaying = true;
-        
+
         // Broadcast event to start visual director
         EventsManager.Broadcast(new OnTurnResolveBegin() 
         { 
@@ -100,7 +102,7 @@ public class Battle : MonoBehaviour
         
         turnResults.Clear();
 
-        // Wait until visuals are done 
+        // Wait until turn result visuals are done playing
         yield return new WaitUntil(() => isVisualsPlaying == false);
 
         // Resume turn logic
@@ -113,10 +115,16 @@ public class Battle : MonoBehaviour
         else
         {
             BroadcastTurnStart();
+            isVisualsPlaying = true;
         }
+
+        // Wait until camera is positioned for play
+        yield return new WaitUntil(() => isVisualsPlaying == false);
+        BroadcastAviablePlay();
     }
 
     private void BroadcastTurnStart() => EventsManager.Broadcast(new OnTurnStart() { currentActor = GetActiveActor() });
+    private void BroadcastAviablePlay() => EventsManager.Broadcast(new OnPlayIsAviable() { currentActor = GetActiveActor() });
 
     // Only called when one of the actors has taken fatal damage
     private void CheckGameStatus()
@@ -133,6 +141,8 @@ public class Battle : MonoBehaviour
 
             Actor winner = p1.Health <= 0 ? p2 : p1;
             winner.WinRound();
+
+            EventsManager.Broadcast(new OnRoundEnd());
         }
     }
 }

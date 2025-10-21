@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Actor : MonoBehaviour
+public class Actor
 {    
     private int health, wins, turnOrder, diceAmount;
     private bool isBot;

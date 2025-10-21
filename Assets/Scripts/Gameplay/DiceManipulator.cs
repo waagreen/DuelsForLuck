@@ -25,12 +25,12 @@ public class DiceManipulator : MonoBehaviour
 
     private void Awake()
     {
-        EventsManager.AddSubscriber<OnTurnStart>(TryBotPlay);
+        EventsManager.AddSubscriber<OnPlayIsAviable>(TryBotPlay);
     }
 
     private void OnDestroy()
     {
-        EventsManager.RemoveSubscriber<OnTurnStart>(TryBotPlay);
+        EventsManager.RemoveSubscriber<OnPlayIsAviable>(TryBotPlay);
     }
 
     private void Start()
@@ -84,10 +84,12 @@ public class DiceManipulator : MonoBehaviour
         inputActions.Disable();
     }
 
-    private void TryBotPlay(OnTurnStart evt)
+    private void TryBotPlay(OnPlayIsAviable evt)
     {
         if (!evt.currentActor.IsBot) return;
 
+        // We need to initialize the dice velocity, otherwise the condition to broadcast the results will be met immediately
+        foreach (Die die in dice) die.Rb.linearVelocity += Random.Range(0.1f, 0.5f) * maxSpeed * mainCam.transform.up;
         Drop();
     }
 

@@ -35,7 +35,8 @@ public class ActorStatsDisplay : MonoBehaviour
     {
         damageSeq?.Kill();
         damageSeq = DOTween.Sequence();
-        damageSeq.Append(transform.DOPunchScale(Vector3.one * 0.1f, 0.15f, vibrato: 3, elasticity: 0.3f));
+        damageSeq.Append(ForceState(Vector3.one * focusedSize, 0f, 0.025f));
+        damageSeq.Append(ForceState(Vector3.one * unfocusedSize, 0.5f, 0.025f));
         damageSeq.Play();
     }
     
@@ -46,18 +47,23 @@ public class ActorStatsDisplay : MonoBehaviour
         // TODO: IMPLEMENT FOR HEALING DICES
     }
 
-    private void UpdateState(OnImmediateTurnChange evt)
+    private Sequence ForceState(Vector3 targetScale, float fadeValue, float duration)
     {
-        focusSeq?.Kill();
-        focusSeq = DOTween.Sequence();
+        Sequence sequence = DOTween.Sequence();
+        sequence.Append(transform.DOScale(targetScale, focusTime));
+        sequence.Join(focusMask.DOFade(fadeValue, duration));
+        sequence.SetEase(Ease.OutBack);
+        return sequence;
+    }
 
-        bool isFocus = evt.turnIndex == ownerOrder;
+    private void UpdateState(OnTurnStart evt)
+    {
+        bool isFocus = evt.currentActor.Order == ownerOrder;
         Vector3 targetScale = (isFocus ? focusedSize : unfocusedSize) * Vector3.one;
         float fadeValue = isFocus ? 0f : 0.5f;
-
-        focusSeq.Append(transform.DOScale(targetScale, focusTime));
-        focusSeq.Join(focusMask.DOFade(fadeValue, focusTime));
-        focusSeq.SetEase(Ease.OutBack);
+        
+        focusSeq?.Kill();
+        focusSeq = ForceState(targetScale, fadeValue, focusTime);
         focusSeq.Play();
     }
 
@@ -72,15 +78,14 @@ public class ActorStatsDisplay : MonoBehaviour
     private void Awake()
     {
         EventsManager.AddSubscriber<OnActorHealthChange>(UpdateDisplay);
-        EventsManager.AddSubscriber<OnImmediateTurnChange>(UpdateState);
+        EventsManager.AddSubscriber<OnTurnStart>(UpdateState);
         EventsManager.AddSubscriber<OnCreateActor>(Setup);
-
     }
 
     private void OnDestroy()
     {
         EventsManager.RemoveSubscriber<OnActorHealthChange>(UpdateDisplay);
-        EventsManager.RemoveSubscriber<OnImmediateTurnChange>(UpdateState);
+        EventsManager.RemoveSubscriber<OnTurnStart>(UpdateState);
         EventsManager.RemoveSubscriber<OnCreateActor>(Setup);
     }
 }

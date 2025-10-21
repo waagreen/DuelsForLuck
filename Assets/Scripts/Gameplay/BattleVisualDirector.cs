@@ -8,6 +8,10 @@ public class BattleVisualDirector : MonoBehaviour
     [SerializeField] private OrbitCamera orbitCamera;
     [SerializeField] private BattleDisplay p1Display, p2Display;
 
+    private static readonly WaitForSeconds _waitForSeconds0_15 = new(0.15f);
+    private static readonly WaitForSeconds _waitForSeconds0_8 = new(0.8f);
+    private static readonly WaitForSeconds _waitForSeconds1_5 = new(1.5f);
+
     private void Awake()
     {
         EventsManager.AddSubscriber<OnTurnStart>(HandleTurnStartVisuals);
@@ -33,15 +37,16 @@ public class BattleVisualDirector : MonoBehaviour
         float orbitAngle = (turnIndex == 0) ? 180f : 0f;
 
         Sequence turnSeq = DOTween.Sequence();
+        turnSeq.AppendInterval(0.35f);
         turnSeq.Append(orbitCamera.OrbitToAngle(orbitAngle, 1f).SetEase(Ease.InOutSine));
         turnSeq.AppendInterval(0.2f);
         turnSeq.Append(orbitCamera.AdjustViewAngle(45f, 0.6f).SetEase(Ease.InBack));
+        turnSeq.AppendInterval(0.35f);
 
         // Waits for the camera sequence to finish
         yield return turnSeq.WaitForCompletion();
         
-        // (Optional) If the logic needs to wait for it (ie: bot play)
-        // We can send a "OnTurnVisualsReady" here
+        EventsManager.Broadcast(new OnTurnVisualsComplete());
     }
 
     private void HandleTurnResolveVisuals(OnTurnResolveBegin evt)
@@ -52,8 +57,8 @@ public class BattleVisualDirector : MonoBehaviour
     private IEnumerator RunTurnResolveVisuals(OnTurnResolveBegin evt)
     {
         // Grab correct references
-        BattleDisplay activeDisplay = (evt.activeActor.Order == 0) ? p1Display : p2Display;
-        ActorModel damagedModel = ((evt.passiveActor.Order == 0) ? p1Display : p2Display).GetModel();
+        BattleDisplay activeDisplay = (evt.activeActor.Order == 0) ? p2Display : p1Display;
+        ActorModel damagedModel = activeDisplay.GetModel();
         int passiveActorIndex = evt.passiveActor.Order;
 
         // Turn camera to face the opponent
@@ -78,7 +83,7 @@ public class BattleVisualDirector : MonoBehaviour
                 damagedModel.Hurt(); // broadcast an event?
                 BroadcastCameraShake(0.1f, roll.damage);
 
-                yield return new WaitForSeconds(0.15f);
+                yield return _waitForSeconds0_15;
             }
             else // Miss
             {
@@ -86,11 +91,11 @@ public class BattleVisualDirector : MonoBehaviour
             }
 
             // Pauses for legibility
-            yield return new WaitForSeconds(0.8f);
+            yield return _waitForSeconds0_8;
         }
         
         // Pauses for legibility
-        yield return new WaitForSeconds(1.5f);
+        yield return _waitForSeconds1_5;
 
         // Hide all dice
         yield return activeDisplay.HideAllDice(0.2f).WaitForCompletion();
