@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class GameEvent { }
 
 public class OnCameraShake : GameEvent
@@ -44,12 +46,13 @@ public class OnGameEnd : GameEvent
     public Actor winner;
 }
 
-public class OnNextRound : GameEvent
-{
+public class OnNextRound : GameEvent {}
+public class OnBotPlay : GameEvent { }
+public class OnTurnVisualsComplete : GameEvent { }
 
-}
-
-public class OnBotPlay : GameEvent
+public class OnTurnResolveBegin : GameEvent
 {
-    
+    public List<DieRoll> results;
+    public Actor activeActor;
+    public Actor passiveActor;
 }

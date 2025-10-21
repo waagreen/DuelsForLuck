@@ -12,7 +12,6 @@ public class BattleDisplay : MonoBehaviour
     [SerializeField][Range(0, 1)] private int damageFrom;
 
     private List<DieDisplay> diceRepresentation;
-    private Sequence damageSequence;
 
     private void Start()
     {
@@ -26,7 +25,29 @@ public class BattleDisplay : MonoBehaviour
         }
     }
 
-    private void ResetRepresentations()
+    public Tween ShowDieFace(int dieIndex, int faceValue, float duration)
+    {
+        if (dieIndex < 0 || dieIndex >= diceRepresentation.Count) return null;
+        return diceRepresentation[dieIndex].ShowFace(faceValue, duration);
+    }
+
+    public Tween DisableDie(int dieIndex, float duration)
+    {
+        if (dieIndex < 0 || dieIndex >= diceRepresentation.Count) return null;
+        return diceRepresentation[dieIndex].Disable(duration);
+    }
+
+    public Sequence HideAllDice(float duration)
+    {
+        Sequence hideSeq = DOTween.Sequence();
+        foreach (var die in diceRepresentation)
+        {
+            hideSeq.Join(die.Hide(duration));
+        }
+        return hideSeq;
+    }
+
+    public void ResetRepresentations()
     {
         foreach (DieDisplay die in diceRepresentation)
         {
@@ -34,65 +55,5 @@ public class BattleDisplay : MonoBehaviour
         }
     }
 
-    private void BroadcastHealth(int damage, int damagedActor)
-    {
-        // Since this is called after changing the turn order, we pass the active actors's health, since they received damage last turn
-        EventsManager.Broadcast(new OnActorHealthChange() { turnIndex = damagedActor, dealtaHealth = -damage });
-    }
-
-    private void BroadcastCameraShake(float duration, int damage)
-    {
-        bool isCrit = damage > 1;
-        OnCameraShake shake = new()
-        {
-            duration = duration * (isCrit ? 1.2f : 1f),
-            strength = isCrit ? 2f : 0.5f,
-            vibrato = isCrit ? 6 : 2,
-            randomness = isCrit ? 60f : 30f,
-        };
-
-        EventsManager.Broadcast(shake);
-    }
-
-    public Sequence DamageFeedbackSequence(List<DieRoll> turnResults, int damagedActor)
-    {
-        damageSequence?.Kill();
-        damageSequence = DOTween.Sequence();
-
-        // Display each die result sequentialy 
-        for (int i = 0; i < turnResults.Count; i++)
-        {
-            DieRoll roll = turnResults[i];
-            DieDisplay die = diceRepresentation[i];
-
-            damageSequence.Append(die.ShowFace(roll.value - 1, 0.2f));
-
-            // Face value of 1 represents zero damage
-            if (roll.value > 1)
-            {
-                damageSequence.JoinCallback(() => BroadcastHealth(roll.damage, damagedActor));
-                damageSequence.Join(model.Hurt());
-                damageSequence.JoinCallback(() => BroadcastCameraShake(0.1f, roll.damage));
-            }
-            else
-            {
-                damageSequence.AppendInterval(0.25f);
-                damageSequence.Append(die.Disable(0.3f));
-            }
-
-            damageSequence.AppendInterval(0.8f);
-        }
-
-        // Wait for readability
-        damageSequence.AppendInterval(1.5f);
-
-        // Hide all dice simultaneously
-        for (int i = 0; i < turnResults.Count; i++)
-        {
-            damageSequence.Join(diceRepresentation[i].Hide(0.2f));
-        }
-
-        damageSequence.OnComplete(ResetRepresentations);
-        return damageSequence;
-    }
+    public ActorModel GetModel() => model;
 }
