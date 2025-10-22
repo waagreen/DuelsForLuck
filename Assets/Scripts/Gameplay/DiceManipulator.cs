@@ -158,7 +158,6 @@ public class DiceManipulator : MonoBehaviour
             Die die = dice[i];
             Rigidbody rb = die.Rb;
 
-            // Each die is offset alternating between left and right
             float offsetX = startOffset + i * diceSpacing;
             Vector3 targetPosition = pointerWorld + offsetX * mainCam.transform.right;
 
