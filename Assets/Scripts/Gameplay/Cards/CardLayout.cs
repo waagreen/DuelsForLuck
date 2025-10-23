@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class CardLayout : MonoBehaviour
 {
-    [SerializeField] private List<Transform> cards;
     [SerializeField] private Vector2 xyBounds;
 
     [SerializeField][Min(0.01f)] private float updateDuration = 0.3f;
@@ -13,6 +12,7 @@ public class CardLayout : MonoBehaviour
 
     private const float kIndexOffsetZ = 0.05f;
     private Sequence updateSeq;
+    private List<CardVisual> cards;
 
     private void Start()
     {
@@ -47,7 +47,7 @@ public class CardLayout : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            Transform card = cards[i];
+            CardVisual card = cards[i];
             if (card == null)
             {
                 cards.Remove(card);
@@ -76,10 +76,10 @@ public class CardLayout : MonoBehaviour
 
             if (Application.isPlaying)
             {
-                updateSeq.Join(card.DOMove(targetPosition, updateDuration));
-                updateSeq.Join(card.DORotateQuaternion(targetRotation, updateDuration));
+                updateSeq.Join(card.transform.DOMove(targetPosition, updateDuration));
+                updateSeq.Join(card.transform.DORotateQuaternion(targetRotation, updateDuration));
             }
-            else card.SetPositionAndRotation(targetPosition, targetRotation);
+            else card.transform.SetPositionAndRotation(targetPosition, targetRotation);
         }
 
         if (Application.isPlaying)
@@ -89,19 +89,21 @@ public class CardLayout : MonoBehaviour
         }
     }
 
-    public void AddCard(Transform card)
+    public void AddCard(CardVisual card, bool ignoreUpdate = false)
     {
         if (card != null && !cards.Contains(card))
         {
             cards.Add(card);
+            if (ignoreUpdate) return;
             UpdateLayout();
         }
     }
 
-    public void RemoveCard(Transform card)
+    public void RemoveCard(CardVisual card, bool ignoreUpdate = false)
     {
         if (card != null && cards.Remove(card))
         {
+            if (ignoreUpdate) return;
             UpdateLayout();
         }
     }
@@ -115,7 +117,7 @@ public class CardLayout : MonoBehaviour
 
         Gizmos.matrix = transform.localToWorldMatrix;
         Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(transform.position, new(xyBounds.x, xyBounds.y, 0.05f));
+        Gizmos.DrawWireCube(Vector3.zero, new(xyBounds.x, xyBounds.y, 0.05f));
         
         Gizmos.matrix = originalMatrix;
     }
