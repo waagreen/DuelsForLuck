@@ -10,7 +10,7 @@ public class Actor
     public static Color PColor => new(0.23f, 0.54f, 0.8f);
     public static Color BotColor => new(0.8f, 0.23f, 0.54f);
 
-    public Actor(int turnOrder, int health, int diceAmount, bool isBot)
+    public Actor(int turnOrder, int health, int diceAmount, bool isBot, StartingDeck startingDeck)
     {
         this.turnOrder = turnOrder;
         this.diceAmount = diceAmount;
@@ -18,6 +18,16 @@ public class Actor
         this.isBot = isBot;
 
         deck = new();
+        if (startingDeck != null)
+        {
+            foreach (DeckEntry entry in startingDeck.cards)
+            {
+                for (int i = 0; i < entry.amount; i++)
+                {
+                    deck.Add(new CardRuntime(entry.data));
+                }
+            }            
+        }
     }
 
     public int Health
@@ -29,6 +39,7 @@ public class Actor
     public int DiceAmount => diceAmount;
     public int Order => turnOrder;
     public bool IsBot => isBot;
+    
     public bool IsWinner() => wins == 2;
     public void WinRound()
     {

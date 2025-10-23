@@ -10,13 +10,13 @@ public class CardLayout : MonoBehaviour
     [SerializeField][Min(0f)] private float spacing = 0.5f;
     [SerializeField] private float arcDeggres = 15f;
 
-    private const float kIndexOffsetZ = 0.05f;
+    private const float kIndexOffsetZ = 0.001f;
     private Sequence updateSeq;
-    private List<CardVisual> cards;
+    public List<CardVisual> cards;
 
     private void Start()
     {
-        UpdateLayout();
+        cards = new();
     }
 
     public void UpdateLayout()

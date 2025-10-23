@@ -1,9 +1,10 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CardVisual : MonoBehaviour
 {
-    [SerializeField] private SpriteRenderer artHolder;
+    [SerializeField] private Image artHolder;
     [SerializeField] private TMP_Text nickname, description;
 
     public void Setup(CardRuntime info)

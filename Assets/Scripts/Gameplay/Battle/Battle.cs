@@ -11,6 +11,7 @@ public struct DieRoll
 public class Battle : MonoBehaviour
 {
     [SerializeField] private int initalPlayersHealth = 10, initialDiceAmount = 2;
+    [SerializeField] private StartingDeck testDeck;
 
     private Actor p1 = null;
     private Actor p2 = null;
@@ -46,8 +47,8 @@ public class Battle : MonoBehaviour
         turnIndex = 0;
         turnResults = new();
         
-        p1 = new(turnIndex, initalPlayersHealth, initialDiceAmount, false);
-        p2 = new(turnIndex + 1, initalPlayersHealth, initialDiceAmount, true);
+        p1 = new(turnIndex, initalPlayersHealth, initialDiceAmount, false, testDeck);
+        p2 = new(turnIndex + 1, initalPlayersHealth, initialDiceAmount, true, testDeck);
 
         EventsManager.Broadcast(new OnCreateActor() { newActor = p1 });
         EventsManager.Broadcast(new OnCreateActor() { newActor = p2 });

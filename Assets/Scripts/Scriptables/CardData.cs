@@ -1,12 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "CardInfo", menuName = "Scriptable Objects/CardInfo")]
+[CreateAssetMenu(fileName = "CardData", menuName = "Cards/CardData")]
 public class CardData : ScriptableObject
 {
     public string id;
     public string nickname;
     public string description;
     public Sprite artwork;
-    
-    // TODO: Store card effect in some robust way
+    public List<EffectData> effects;
 }

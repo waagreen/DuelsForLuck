@@ -371,7 +371,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 323813242}
   - {fileID: 449875629}
@@ -2010,14 +2010,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 852479514}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: -0.7071068}
-  m_LocalPosition: {x: 6, y: 5, z: 0}
+  m_LocalRotation: {x: 0, y: 0.92387956, z: -0.38268343, w: 0}
+  m_LocalPosition: {x: 0, y: 5, z: 6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1425131619}
   m_Father: {fileID: 593021042}
-  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: 180, z: 0}
 --- !u!114 &852479516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2047,6 +2047,7 @@ GameObject:
   m_Component:
   - component: {fileID: 856688034}
   - component: {fileID: 856688033}
+  - component: {fileID: 856688035}
   m_Layer: 0
   m_Name: CardLayout
   m_TagString: Untagged
@@ -2066,10 +2067,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24a9ee1ae72ee1243b6fea2b635b0f86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xyBounds: {x: 15, y: 2}
+  xyBounds: {x: 16, y: 0.35}
   updateDuration: 0.3
-  spacing: 3
-  arcDeggres: 30
+  spacing: 0.7
+  arcDeggres: 15
+  cards: []
 --- !u!4 &856688034
 Transform:
   m_ObjectHideFlags: 0
@@ -2078,13 +2080,28 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 856688031}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.000000118189426, w: 1}
-  m_LocalPosition: {x: -33.47, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: 0, y: 2.25, z: -5}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+--- !u!114 &856688035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 856688031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98bc48f9d0beea243b8ca7a0dbf05683, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layout: {fileID: 856688033}
+  visualPrefab: {fileID: 7546259165318998414, guid: 8dbea0bec8bf6964186653e2ff52f30c, type: 3}
+  debugCards: 6
 --- !u!1 &859549336
 GameObject:
   m_ObjectHideFlags: 0
@@ -2344,7 +2361,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1402242441}
   m_Layer: 0
-  m_Name: --------MANAGERS---------
+  m_Name: --GAMESYSTEM--
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2878,6 +2895,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initalPlayersHealth: 10
   initialDiceAmount: 2
+  testDeck: {fileID: 0}
 --- !u!212 &1717655033 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 4367793481666452335, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
