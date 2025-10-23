@@ -43,6 +43,8 @@ public class Actor
     public bool IsWinner() => wins == 2;
     public void WinRound()
     {
-        wins++;        
+        wins++;
     }
+
+    public List<CardRuntime> Deck => deck;
 }

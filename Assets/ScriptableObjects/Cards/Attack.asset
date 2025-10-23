@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f5b02a53c5f7f74b9ab8482f343d3a8, type: 3}
+  m_Name: Attack
+  m_EditorClassIdentifier: 
+  id: 0
+  nickname: Attack
+  description: Deal damage equivalent to 2x the energy spent.
+  artwork: {fileID: 21300000, guid: 35110ad3675ec894285bdb4861df4713, type: 3}
+  baseCost: 1
+  effects:
+  - {fileID: 11400000, guid: d15b630c90831f94388aeb624d1c688b, type: 2}

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "PoisonEffectData", menuName = "Cards/EffectData/Damage")]
+[CreateAssetMenu(fileName = "PoisonEffectData", menuName = "Cards/EffectData/Poison")]
 public class PoisonEffectData : EffectData
 {
     public int baseDuration;

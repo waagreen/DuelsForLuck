@@ -8,5 +8,6 @@ public class CardData : ScriptableObject
     public string nickname;
     public string description;
     public Sprite artwork;
+    public int baseCost;
     public List<EffectData> effects;
 }

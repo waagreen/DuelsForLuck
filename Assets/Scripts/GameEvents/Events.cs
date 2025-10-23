@@ -7,11 +7,6 @@ public class OnCreateActor : GameEvent
     public Actor newActor;
 }
 
-public class OnCreateDeck : GameEvent
-{
-    public List<CardRuntime> deck;
-}
-
 #region PLAY
 
 public class OnDieResult : GameEvent
