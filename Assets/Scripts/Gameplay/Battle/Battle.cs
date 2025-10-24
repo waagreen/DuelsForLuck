@@ -50,8 +50,8 @@ public class Battle : MonoBehaviour
         p1 = new(turnIndex, initalPlayersHealth, initialDiceAmount, false, testDeck);
         p2 = new(turnIndex + 1, initalPlayersHealth, initialDiceAmount, true, testDeck);
 
-        EventsManager.Broadcast(new OnCreateActor() { newActor = p1 });
-        EventsManager.Broadcast(new OnCreateActor() { newActor = p2 });
+        EventsManager.Broadcast(new OnCreateActor() { actor = p1 });
+        EventsManager.Broadcast(new OnCreateActor() { actor = p2 });
 
         BroadcastTurnStart();
     }
@@ -124,15 +124,15 @@ public class Battle : MonoBehaviour
         BroadcastAviablePlay();
     }
 
-    private void BroadcastTurnStart() => EventsManager.Broadcast(new OnTurnStart() { currentActor = GetActiveActor() });
-    private void BroadcastAviablePlay() => EventsManager.Broadcast(new OnPlayIsAviable() { currentActor = GetActiveActor() });
+    private void BroadcastTurnStart() => EventsManager.Broadcast(new OnTurnStart() { actor = GetActiveActor() });
+    private void BroadcastAviablePlay() => EventsManager.Broadcast(new OnPlayIsAviable() { actor = GetActiveActor() });
 
     // Only called when one of the actors has taken fatal damage
     private void CheckGameStatus()
     {
         if (p1.IsWinner() || p2.IsWinner())
         {
-            EventsManager.Broadcast(new OnGameEnd { winner = p1.IsWinner() ? p1 : p2 });
+            EventsManager.Broadcast(new OnGameEnd { actor = p1.IsWinner() ? p1 : p2 });
         }
         else
         {

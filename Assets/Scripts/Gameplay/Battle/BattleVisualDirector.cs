@@ -28,7 +28,7 @@ public class BattleVisualDirector : MonoBehaviour
 
     private void HandleTurnStartVisuals(OnTurnStart evt)
     {
-        StartCoroutine(RunTurnStartSequence(evt.currentActor.Order));
+        StartCoroutine(RunTurnStartSequence(evt.actor.Order));
     } 
 
     private IEnumerator RunTurnStartSequence(int turnIndex)

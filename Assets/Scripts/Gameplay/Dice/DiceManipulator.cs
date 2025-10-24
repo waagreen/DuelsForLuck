@@ -86,7 +86,7 @@ public class DiceManipulator : MonoBehaviour
 
     private void TryBotPlay(OnPlayIsAviable evt)
     {
-        if (!evt.currentActor.IsBot) return;
+        if (!evt.actor.IsBot) return;
 
         // We need to initialize the dice velocity, otherwise the condition to broadcast the results will be met immediately
         foreach (Die die in dice) die.Rb.linearVelocity += Random.Range(0.1f, 0.5f) * maxSpeed * mainCam.transform.up;

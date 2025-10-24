@@ -1,20 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Hand : MonoBehaviour
+public class DeckVisual : MonoBehaviour
 {
-    [SerializeField] private CardLayout layout;
+    [SerializeField] private StackCardLayout layout;
     [SerializeField] private CardVisual visualPrefab;
     [SerializeField] private int ownerStartingOrder;
-
+    
     private void Awake()
     {
-        EventsManager.AddSubscriber<OnCreateActor>(PopulateHand);
+        EventsManager.AddSubscriber<OnCreateActor>(PopulateDeck);
     }
 
     private void OnDestroy()
     {
-        EventsManager.RemoveSubscriber<OnCreateActor>(PopulateHand);
+        EventsManager.RemoveSubscriber<OnCreateActor>(PopulateDeck);
     }
 
     private void CreateCard(CardRuntime info, bool ignoreUpdate)
@@ -24,11 +24,11 @@ public class Hand : MonoBehaviour
         layout.AddCard(cardVisual, ignoreUpdate);
     }
 
-    private void PopulateHand(OnCreateActor evt)
+    private void PopulateDeck(OnCreateActor evt)
     {
-        if (ownerStartingOrder != evt.newActor.Order) return;
+        if (ownerStartingOrder != evt.actor.Order) return;
         
-        List<CardRuntime> deck = evt.newActor.Deck;
+        List<CardRuntime> deck = evt.actor.Deck;
         int count = deck.Count;
 
         if (deck == null || count < 1) return;
@@ -39,5 +39,4 @@ public class Hand : MonoBehaviour
             CreateCard(cardInfo, (i + 1) != deck.Count);
         }
     }
-
 }

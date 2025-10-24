@@ -1,14 +1,14 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(CardLayout))]
+[CustomEditor(typeof(HorizontalCardLayout))]
 public class CardLayoutEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        CardLayout layoutScript = (CardLayout)target;
+        HorizontalCardLayout layoutScript = (HorizontalCardLayout)target;
         EditorGUILayout.Space(10); 
         if (GUILayout.Button("Update Layout (Editor)"))
         {

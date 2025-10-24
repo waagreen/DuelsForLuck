@@ -58,7 +58,7 @@ public class ActorStatsDisplay : MonoBehaviour
 
     private void UpdateState(OnTurnStart evt)
     {
-        bool isFocus = evt.currentActor.Order == ownerOrder;
+        bool isFocus = evt.actor.Order == ownerOrder;
         Vector3 targetScale = (isFocus ? focusedSize : unfocusedSize) * Vector3.one;
         float fadeValue = isFocus ? 0f : 0.5f;
         
@@ -69,9 +69,9 @@ public class ActorStatsDisplay : MonoBehaviour
 
     private void Setup(OnCreateActor evt)
     {
-        if (evt.newActor.Order != ownerOrder) return;
+        if (evt.actor.Order != ownerOrder) return;
 
-        cachedHealth = evt.newActor.Health;
+        cachedHealth = evt.actor.Health;
         healthText.SetText(cachedHealth.ToString());
     }
 

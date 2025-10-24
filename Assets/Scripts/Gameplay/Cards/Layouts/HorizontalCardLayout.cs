@@ -1,26 +1,22 @@
-using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public class CardLayout : MonoBehaviour
+public class HorizontalCardLayout : CardLayout
 {
+    [Header("Horizontal Card Layout")]
     [SerializeField] private Vector2 xyBounds;
-
-    [SerializeField][Min(0.01f)] private float updateDuration = 0.3f;
     [SerializeField][Min(0f)] private float spacing = 0.5f;
     [SerializeField] private float arcDeggres = 15f;
 
-    private const float kIndexOffsetZ = 0.001f;
-    private Sequence updateSeq;
-    public List<CardVisual> cards;
-
-    private void Start()
+    protected override void Start()
     {
         cards = new();
     }
 
-    public void UpdateLayout()
+    public override void UpdateLayout()
     {
+        base.UpdateLayout();
+
         if ((cards == null) || (xyBounds == null) || (xyBounds == Vector2.zero)) return;
 
         updateSeq?.Kill();
@@ -88,28 +84,6 @@ public class CardLayout : MonoBehaviour
             updateSeq.Play();
         }
     }
-
-    public void AddCard(CardVisual card, bool ignoreUpdate = false)
-    {
-        if (card != null && !cards.Contains(card))
-        {
-            cards.Add(card);
-            if (ignoreUpdate) return;
-            UpdateLayout();
-        }
-    }
-
-    public void RemoveCard(CardVisual card, bool ignoreUpdate = false)
-    {
-        if (card != null && cards.Remove(card))
-        {
-            if (ignoreUpdate) return;
-            UpdateLayout();
-        }
-    }
-
-    private void OnCardEnter() {}
-    private void OnCardExit() {} 
 
     private void OnDrawGizmosSelected()
     {

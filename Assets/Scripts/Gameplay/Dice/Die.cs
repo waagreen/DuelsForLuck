@@ -40,7 +40,7 @@ public class Die : MonoBehaviour
 
     private void UpdateTurnVisuals(OnTurnStart evt)
     {
-        cachedColor = (evt.currentActor.Order == 0) ? Actor.PColor : Actor.BotColor;    
+        cachedColor = (evt.actor.Order == 0) ? Actor.PColor : Actor.BotColor;    
         ColorFaces(cachedColor);
     }
 
