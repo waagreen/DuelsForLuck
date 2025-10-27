@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,6 +15,8 @@ public class CardRuntime
     public Sprite Artwork => artwork;
     public List<EffectRuntime> CurrentEffects => currentEffects;
 
+    public Action<Vector3, CardLayout> OnMove;
+
     public CardRuntime(CardData data)
     {
         nickname = data.nickname;
@@ -29,7 +32,7 @@ public class CardRuntime
         }
     }
 
-    private void OnPlay()
+    public void OnPlay()
     {
         foreach (EffectRuntime effect in currentEffects)
         {

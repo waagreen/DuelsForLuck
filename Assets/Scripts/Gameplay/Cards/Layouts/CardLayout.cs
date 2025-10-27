@@ -13,20 +13,17 @@ public class CardLayout : MonoBehaviour
 
     protected virtual void Start()
     {
-        Debug.Log("Initializing Layout");
         cards = new();
     }
 
-    public virtual void UpdateLayout()
-    {
-
-    }
+    public virtual void UpdateLayout() { }
 
     public virtual void AddCard(CardVisual card, bool ignoreUpdate = false)
     {
         if (card != null && !cards.Contains(card))
         {
             cards.Add(card);
+            card.transform.SetParent(transform);
             if (ignoreUpdate) return;
             UpdateLayout();
         }
@@ -36,6 +33,7 @@ public class CardLayout : MonoBehaviour
     {
         if (card != null && cards.Remove(card))
         {
+            card.transform.SetParent(null);
             if (ignoreUpdate) return;
             UpdateLayout();
         }

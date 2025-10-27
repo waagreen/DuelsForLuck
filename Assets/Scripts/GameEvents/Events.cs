@@ -18,9 +18,10 @@ public class CardsEvent : GameEvent
 #region PLAY
 public class OnBotPlay : GameEvent { }
 
-public class OnDrawCard : CardsEvent { }
-public class OnPlayCard : CardsEvent { }
-public class OnDiscard : CardsEvent { }
+public class OnSendDeck : CardsEvent { } // Sending a group of cards to a player deck
+public class OnSendHand : CardsEvent { } // Sending a group of cards to a player discad
+public class OnSendDiscard : CardsEvent { } // Sending a group of cards to a player discard
+public class OnSendDraw : CardsEvent { } // Sending a group of cards to a player draw
 
 public class OnPlayIsAviable : ActorEvent { }
 

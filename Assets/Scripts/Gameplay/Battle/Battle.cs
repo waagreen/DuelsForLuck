@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public struct DieRoll
@@ -10,7 +11,7 @@ public struct DieRoll
 
 public class Battle : MonoBehaviour
 {
-    [SerializeField] private int initalPlayersHealth = 10, initialDiceAmount = 2;
+    [SerializeField] private int initalPlayersHealth = 10, initialDiceAmount = 2, drawCardsPerTurn = 3;
     [SerializeField] private StartingDeck testDeck;
 
     private Actor p1 = null;
@@ -26,34 +27,6 @@ public class Battle : MonoBehaviour
         if (value == 1) return 0;
         else if (value == 6) return 2;
         else return 1;
-    }
-
-    private void Awake()
-    {
-        EventsManager.AddSubscriber<OnDieResult>(HandleDieResult);
-        EventsManager.AddSubscriber<OnNextRound>(ResetForNextRound);
-        EventsManager.AddSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
-    }
-
-    private void OnDestroy()
-    {
-        EventsManager.RemoveSubscriber<OnDieResult>(HandleDieResult);
-        EventsManager.RemoveSubscriber<OnNextRound>(ResetForNextRound);
-        EventsManager.RemoveSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
-    }
-
-    private void Start()
-    {
-        turnIndex = 0;
-        turnResults = new();
-        
-        p1 = new(turnIndex, initalPlayersHealth, initialDiceAmount, false, testDeck);
-        p2 = new(turnIndex + 1, initalPlayersHealth, initialDiceAmount, true, testDeck);
-
-        EventsManager.Broadcast(new OnCreateActor() { actor = p1 });
-        EventsManager.Broadcast(new OnCreateActor() { actor = p2 });
-
-        BroadcastTurnStart();
     }
 
     private void OnVisualsComplete(OnTurnVisualsComplete evt)
@@ -89,18 +62,42 @@ public class Battle : MonoBehaviour
         StartCoroutine(ResolveTurnSequence());
     }
 
+    private void DrawTurnCards()
+    {
+        Actor activeActor = GetActiveActor();
+        int cardsToDraw = Mathf.Min(drawCardsPerTurn, activeActor.Deck.Count);
+
+        if (cardsToDraw < 1)
+        {
+            // TODO: Do shuffle discard into deck
+            return;
+        }
+
+        List<CardRuntime> cardsToSend = activeActor.Deck.Take(drawCardsPerTurn).ToList();
+        activeActor.Draw.AddRange(cardsToSend);
+        activeActor.Deck.RemoveRange(0, cardsToDraw);
+
+        OnSendDraw drawEvent = new()
+        {
+            cards = cardsToSend,
+            ownerOrder = turnIndex
+        };
+
+        EventsManager.Broadcast(drawEvent);
+    }
+
     private IEnumerator ResolveTurnSequence()
     {
         isVisualsPlaying = true;
 
         // Broadcast event to start visual director
-        EventsManager.Broadcast(new OnTurnResolveBegin() 
-        { 
+        EventsManager.Broadcast(new OnTurnResolveBegin()
+        {
             results = new List<DieRoll>(turnResults),
             activeActor = GetActiveActor(),
             passiveActor = GetPassiveActor()
         });
-        
+
         turnResults.Clear();
 
         // Wait until turn result visuals are done playing
@@ -122,6 +119,7 @@ public class Battle : MonoBehaviour
         // Wait until camera is positioned for play
         yield return new WaitUntil(() => isVisualsPlaying == false);
         BroadcastAviablePlay();
+        DrawTurnCards();
     }
 
     private void BroadcastTurnStart() => EventsManager.Broadcast(new OnTurnStart() { actor = GetActiveActor() });
@@ -145,5 +143,34 @@ public class Battle : MonoBehaviour
 
             EventsManager.Broadcast(new OnRoundEnd());
         }
+    }
+
+    private void Awake()
+    {
+        EventsManager.AddSubscriber<OnDieResult>(HandleDieResult);
+        EventsManager.AddSubscriber<OnNextRound>(ResetForNextRound);
+        EventsManager.AddSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
+    }
+
+    private void OnDestroy()
+    {
+        EventsManager.RemoveSubscriber<OnDieResult>(HandleDieResult);
+        EventsManager.RemoveSubscriber<OnNextRound>(ResetForNextRound);
+        EventsManager.RemoveSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
+    }
+
+    private void Start()
+    {
+        turnIndex = 0;
+        turnResults = new();
+        
+        p1 = new(turnIndex, initalPlayersHealth, initialDiceAmount, false, testDeck);
+        p2 = new(turnIndex + 1, initalPlayersHealth, initialDiceAmount, true, testDeck);
+
+        // Broadcast newly created players and decks
+        EventsManager.Broadcast(new OnCreateActor { actor = p1 });
+        EventsManager.Broadcast(new OnCreateActor { actor = p2 });
+
+        BroadcastTurnStart();
     }
 }

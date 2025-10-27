@@ -6,9 +6,10 @@ public class Actor
 {    
     private int health, wins, turnOrder, diceAmount;
     private bool isBot;
-    private List<CardRuntime> deck;
-    private List<CardRuntime> hand;
-    private List<CardRuntime> discard;
+    private readonly List<CardRuntime> deck;
+    private readonly List<CardRuntime> hand;
+    private readonly List<CardRuntime> discard;
+    private readonly List<CardRuntime> draw;
 
     private const int kInitialHandSize = 5;
 
@@ -24,6 +25,7 @@ public class Actor
 
         deck = new();
         hand = new();
+        draw = new();
         discard = new();
 
         if (startingDeck != null)
@@ -33,19 +35,16 @@ public class Actor
             {
                 for (int i = 0; i < entry.amount; i++)
                 {
-                    deck.Add(new CardRuntime(entry.data));
+                    CardRuntime card = new (entry.data);
+                    deck.Add(card);
                 }
             }
-            
-            // Deal inital hand
-            for (int i = 0; i < kInitialHandSize; i++)
-            {
-                int randomIndex = Random.Range(0, deck.Count);
-                CardRuntime randomCard = deck[randomIndex];
+            deck.Shuffle();
 
-                deck.Remove(randomCard);
-                hand.Add(randomCard);
-            }
+            // Deal inital hand
+            List<CardRuntime> initialHand = deck.Take(kInitialHandSize).ToList();
+            hand.AddRange(initialHand);
+            deck.RemoveRange(0, kInitialHandSize);
         }
     }
 
@@ -66,4 +65,7 @@ public class Actor
     }
 
     public List<CardRuntime> Deck => deck;
+    public List<CardRuntime> Draw => draw;
+    public List<CardRuntime> Discard => discard;
+    public List<CardRuntime> Hand => hand;
 }
