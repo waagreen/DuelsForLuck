@@ -44,24 +44,20 @@ public class Battle : MonoBehaviour
         EventsManager.Broadcast(new OnActorHealthChange { dealtaHealth = initalPlayersHealth });
     }
 
-    private void HandleDieResult(OnDieResult evt)
+    private void ResolveDrawPick(OnPickDrawCards evt)
     {
-        DieRoll roll = new()
-        {
-            value = evt.result,
-            damage = GetDamage(evt.result)
-        };
-        turnResults.Add(roll);
+        Actor actor = GetActiveActor();
 
-        if (turnResults.Count != GetActiveActor().DiceAmount) return;
+        // Remove selected cards from draw pool
+        foreach (CardRuntime card in evt.cards) actor.Draw.Remove(card);
+        
+        // Discard remaining cards on the draw pool, then clear it
+        List<CardRuntime> remainingCards = actor.Draw.ToList();
+        actor.Discard.AddRange(remainingCards);
+        actor.Draw.Clear();
 
-        Actor opposing = GetPassiveActor();
-        foreach (DieRoll value in turnResults)
-        {
-            opposing.Health -= value.damage;
-        }
-
-        StartCoroutine(ResolveTurn());
+        EventsManager.Broadcast(new OnSendCardsToHand { cards = evt.cards.ToList(), ownerOrder = turnIndex });
+        EventsManager.Broadcast(new OnSendCardsToDiscard { cards = remainingCards, ownerOrder = turnIndex });
     }
 
     private void DrawTurnCards()
@@ -79,7 +75,7 @@ public class Battle : MonoBehaviour
         activeActor.Draw.AddRange(cardsToSend);
         activeActor.Deck.RemoveRange(0, cardsToDraw);
 
-        OnSendDraw drawEvent = new()
+        OnSendCardsToDraw drawEvent = new()
         {
             cards = cardsToSend,
             ownerOrder = turnIndex
@@ -129,6 +125,26 @@ public class Battle : MonoBehaviour
         }
     }
 
+    private void HandleDieResult(OnDieResult evt)
+    {
+        DieRoll roll = new()
+        {
+            value = evt.result,
+            damage = GetDamage(evt.result)
+        };
+        turnResults.Add(roll);
+
+        if (turnResults.Count != GetActiveActor().DiceAmount) return;
+
+        Actor opposing = GetPassiveActor();
+        foreach (DieRoll value in turnResults)
+        {
+            opposing.Health -= value.damage;
+        }
+
+        StartCoroutine(ResolveTurn());
+    }
+
     private void BroadcastTurnStart() => EventsManager.Broadcast(new OnTurnStart() { actor = GetActiveActor() });
     private void BroadcastAviablePlay() => EventsManager.Broadcast(new OnPlayIsAviable() { actor = GetActiveActor() });
 
@@ -157,6 +173,7 @@ public class Battle : MonoBehaviour
         EventsManager.AddSubscriber<OnDieResult>(HandleDieResult);
         EventsManager.AddSubscriber<OnNextRound>(ResetForNextRound);
         EventsManager.AddSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
+        EventsManager.AddSubscriber<OnPickDrawCards>(ResolveDrawPick);
     }
 
     private void OnDestroy()
@@ -164,6 +181,7 @@ public class Battle : MonoBehaviour
         EventsManager.RemoveSubscriber<OnDieResult>(HandleDieResult);
         EventsManager.RemoveSubscriber<OnNextRound>(ResetForNextRound);
         EventsManager.RemoveSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
+        EventsManager.RemoveSubscriber<OnPickDrawCards>(ResolveDrawPick);
     }
 
     private void Start()

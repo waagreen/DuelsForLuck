@@ -11,19 +11,19 @@ public class CardsVisualDirector : MonoBehaviour
     private void Awake()
     {
         EventsManager.AddSubscriber<OnCreateActor>(DealInitialCards);
-        EventsManager.AddSubscriber<OnSendDeck>(SendToDeck);
-        EventsManager.AddSubscriber<OnSendDraw>(SendToDraw);
-        EventsManager.AddSubscriber<OnSendDiscard>(SendToDiscard);
-        EventsManager.AddSubscriber<OnSendHand>(SendToHand);
+        EventsManager.AddSubscriber<OnSendCardsToDeck>(SendToDeck);
+        EventsManager.AddSubscriber<OnSendCardsToDraw>(SendToDraw);
+        EventsManager.AddSubscriber<OnSendCardsToDiscard>(SendToDiscard);
+        EventsManager.AddSubscriber<OnSendCardsToHand>(SendToHand);
     }
 
     private void OnDestroy()
     {
         EventsManager.RemoveSubscriber<OnCreateActor>(DealInitialCards);
-        EventsManager.RemoveSubscriber<OnSendDeck>(SendToDeck);
-        EventsManager.RemoveSubscriber<OnSendDraw>(SendToDraw);
-        EventsManager.RemoveSubscriber<OnSendDiscard>(SendToDiscard);
-        EventsManager.RemoveSubscriber<OnSendHand>(SendToHand);
+        EventsManager.RemoveSubscriber<OnSendCardsToDeck>(SendToDeck);
+        EventsManager.RemoveSubscriber<OnSendCardsToDraw>(SendToDraw);
+        EventsManager.RemoveSubscriber<OnSendCardsToDiscard>(SendToDiscard);
+        EventsManager.RemoveSubscriber<OnSendCardsToHand>(SendToHand);
     }
 
     private bool IsOwnerActor(int eventOrder) => eventOrder == ownerStartingOrder;
@@ -62,25 +62,25 @@ public class CardsVisualDirector : MonoBehaviour
         }
     }
 
-    private void SendToDeck(OnSendDeck evt)
+    private void SendToDeck(OnSendCardsToDeck evt)
     {
         if (!IsOwnerActor(evt.ownerOrder)) return;
         InvokeGoTo(evt.cards, deck.transform, deck.Layout);
     }
 
-    private void SendToDiscard(OnSendDiscard evt)
+    private void SendToDiscard(OnSendCardsToDiscard evt)
     {
         if (!IsOwnerActor(evt.ownerOrder)) return;
         InvokeGoTo(evt.cards, discard.transform, discard.Layout);
     }
 
-    private void SendToHand(OnSendHand evt)
+    private void SendToHand(OnSendCardsToHand evt)
     {
         if (!IsOwnerActor(evt.ownerOrder)) return;
         InvokeGoTo(evt.cards, hand.transform, hand.Layout);
     }
     
-    private void SendToDraw(OnSendDraw evt)
+    private void SendToDraw(OnSendCardsToDraw evt)
     {
         if (!IsOwnerActor(evt.ownerOrder)) return;
         InvokeGoTo(evt.cards, draw.transform, draw.Layout);

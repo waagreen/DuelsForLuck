@@ -7,6 +7,15 @@ public class HorizontalCardLayout : CardLayout
     [SerializeField] private Vector2 xyBounds;
     [SerializeField][Min(0f)] private float spacing = 0.5f;
     [SerializeField] private float arcDeggres = 15f;
+    
+    [Header("Focus Settings")]
+    [SerializeField] private float focusHeightIncrease = 0.5f;
+    [SerializeField] private float focusAngle = 0f;
+    [SerializeField] private float hoverHeightIncrease = 0.2f;
+    
+    [Header("Neighbor Reaction")]
+    [SerializeField][Range(0f, 1f)] private float neighborPushDistance = 0.2f;
+    [SerializeField][Range(0f, 5f)] private float neighborAngle = 5f;
 
     protected override void Start()
     {
@@ -53,15 +62,43 @@ public class HorizontalCardLayout : CardLayout
 
             // Horizontal position
             float xOffset = startOffset + i * actualSpacing;
-
             // Normalized (-1 to 1) position in relation to the center
             float xNormalized = (totalWidth > 0f) ? (xOffset / (totalWidth / 2f)) : 0f;
-
             // Vertical position following: y = (1 - x²) * H
             float yOffset = (1 - (xNormalized * xNormalized)) * xyBounds.y;
-
             // Rotation angle. Left -1, center 0, right 1
             float angle = -xNormalized * arcDeggres;
+
+            // Handle neighbours reactions to card state
+            if (i > 0) // Left neighbour
+            {
+                CardVisual left = cards[i - 1];
+                if (left.IsHovering || left.IsOnFocus)
+                {
+                    xOffset += neighborPushDistance;
+                    angle += neighborAngle;
+                }
+            }
+            if (i < count - 1) // Left neighbour
+            {
+                CardVisual right = cards[i + 1];
+                if (right.IsHovering || right.IsOnFocus)
+                {
+                    xOffset -= neighborPushDistance;
+                    angle -= neighborAngle;
+                }
+            }
+
+            // Handle different card states
+            if (card.IsOnFocus)
+            {
+                yOffset += focusHeightIncrease;
+                angle = focusAngle;
+            }
+            else if (card.IsHovering)
+            {
+                yOffset += hoverHeightIncrease;
+            }
 
             Vector3 targetPosition = basePosition +
             (transform.right * xOffset) +

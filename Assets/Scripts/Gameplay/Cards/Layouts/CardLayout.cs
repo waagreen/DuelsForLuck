@@ -6,14 +6,24 @@ public class CardLayout : MonoBehaviour
 {
     [Header("Base Card Layout")]
     [SerializeField][Min(0.01f)] protected float updateDuration = 0.3f;
+    [SerializeField] private bool isPickableLayout;
     
     protected const float kIndexOffsetZ = 0.001f;
     protected List<CardVisual> cards;
     protected Sequence updateSeq;
 
+    protected virtual void Awake()
+    {
+    }
+
     protected virtual void Start()
     {
         cards = new();
+    }
+
+    protected virtual void OnDestroy()
+    {
+        
     }
 
     public virtual void UpdateLayout() { }
