@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Actor
 {    
-    private int health, wins, turnOrder, diceAmount;
+    private int health, wins, turnOrder, diceAmount, turnDrawAmount;
     private bool isBot;
     private readonly List<CardRuntime> deck;
     private readonly List<CardRuntime> hand;
@@ -27,6 +27,8 @@ public class Actor
         hand = new();
         draw = new();
         discard = new();
+
+        turnDrawAmount = 1;
 
         if (startingDeck != null)
         {
@@ -56,6 +58,7 @@ public class Actor
     
     public int DiceAmount => diceAmount;
     public int Order => turnOrder;
+    public int TurnPickAmount => turnDrawAmount;
     public bool IsBot => isBot;
     
     public bool IsWinner() => wins == 2;

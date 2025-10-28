@@ -22,7 +22,10 @@ public class OnSendCardsToDeck : CardsEvent { }
 public class OnSendCardsToHand : CardsEvent { }
 public class OnSendCardsToDiscard : CardsEvent { }
 public class OnSendCardsToDraw : CardsEvent { }
-public class OnPickDrawCards : CardsEvent { }
+public class OnPickDrawCard : GameEvent
+{
+    public CardRuntime pickedCard;
+}
 
 public class OnPlayIsAviable : ActorEvent { }
 

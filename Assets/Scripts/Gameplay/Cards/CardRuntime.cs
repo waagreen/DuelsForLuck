@@ -15,7 +15,7 @@ public class CardRuntime
     public Sprite Artwork => artwork;
     public List<EffectRuntime> CurrentEffects => currentEffects;
 
-    public Action<Vector3, CardLayout> OnMove;
+    public Action<CardLayout> OnMove;
 
     public CardRuntime(CardData data)
     {

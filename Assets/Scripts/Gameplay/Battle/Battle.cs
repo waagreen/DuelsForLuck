@@ -16,7 +16,7 @@ public class Battle : MonoBehaviour
 
     private Actor p1 = null;
     private Actor p2 = null;
-    private int turnIndex;
+    private int turnIndex, picksThisTurn;
     private bool isVisualDirectorPlaying = false;
     private List<DieRoll> turnResults;
 
@@ -44,19 +44,22 @@ public class Battle : MonoBehaviour
         EventsManager.Broadcast(new OnActorHealthChange { dealtaHealth = initalPlayersHealth });
     }
 
-    private void ResolveDrawPick(OnPickDrawCards evt)
+    private void ResolveDrawPick(OnPickDrawCard evt)
     {
+        picksThisTurn++;
         Actor actor = GetActiveActor();
 
-        // Remove selected cards from draw pool
-        foreach (CardRuntime card in evt.cards) actor.Draw.Remove(card);
-        
+        // Remove selected card from draw pool
+        actor.Draw.Remove(evt.pickedCard);
+        EventsManager.Broadcast(new OnSendCardsToHand { cards = new(){evt.pickedCard}, ownerOrder = turnIndex });
+
+        if (picksThisTurn < actor.TurnPickAmount) return;
+
         // Discard remaining cards on the draw pool, then clear it
         List<CardRuntime> remainingCards = actor.Draw.ToList();
         actor.Discard.AddRange(remainingCards);
         actor.Draw.Clear();
 
-        EventsManager.Broadcast(new OnSendCardsToHand { cards = evt.cards.ToList(), ownerOrder = turnIndex });
         EventsManager.Broadcast(new OnSendCardsToDiscard { cards = remainingCards, ownerOrder = turnIndex });
     }
 
@@ -90,7 +93,8 @@ public class Battle : MonoBehaviour
         isVisualDirectorPlaying = true;
         BroadcastTurnStart();
         yield return WaitVisualDirector();
-            
+
+        picksThisTurn = 0;
         BroadcastAviablePlay();
         DrawTurnCards();
     }
@@ -173,7 +177,7 @@ public class Battle : MonoBehaviour
         EventsManager.AddSubscriber<OnDieResult>(HandleDieResult);
         EventsManager.AddSubscriber<OnNextRound>(ResetForNextRound);
         EventsManager.AddSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
-        EventsManager.AddSubscriber<OnPickDrawCards>(ResolveDrawPick);
+        EventsManager.AddSubscriber<OnPickDrawCard>(ResolveDrawPick);
     }
 
     private void OnDestroy()
@@ -181,7 +185,7 @@ public class Battle : MonoBehaviour
         EventsManager.RemoveSubscriber<OnDieResult>(HandleDieResult);
         EventsManager.RemoveSubscriber<OnNextRound>(ResetForNextRound);
         EventsManager.RemoveSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
-        EventsManager.RemoveSubscriber<OnPickDrawCards>(ResolveDrawPick);
+        EventsManager.RemoveSubscriber<OnPickDrawCard>(ResolveDrawPick);
     }
 
     private void Start()

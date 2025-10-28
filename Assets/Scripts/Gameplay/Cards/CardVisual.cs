@@ -11,7 +11,7 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
 
     private CardLayout currentLayout;
     private CardRuntime info;
-    private Tween moveTween;
+    private Sequence moveTween;
     private bool isGoingTo, isOnFocus, isHovering;
     private const float kGotoDuration = 0.6f;
 
@@ -37,13 +37,18 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
         info.OnMove -= GoTo;
     }
 
-    private void OnReachDestination()
+    private void ResetAllFlags()
     {
-        currentLayout.AddCard(this);
-        isGoingTo = false;
+        isGoingTo = isOnFocus = isHovering = false;
     }
 
-    private void GoTo(Vector3 destinationWorld, CardLayout newLayout)
+    private void OnReachDestination()
+    {
+        ResetAllFlags();
+        currentLayout.AddCard(this);
+    }
+
+    private void GoTo(CardLayout newLayout)
     {
         isGoingTo = true;
 
@@ -51,7 +56,10 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
         currentLayout = newLayout;
 
         moveTween?.Kill();
-        moveTween = transform.DOMove(destinationWorld, kGotoDuration).SetEase(Ease.OutQuad);
+        moveTween = DOTween.Sequence();
+        moveTween.Append(transform.DOMove(currentLayout.transform.position, kGotoDuration));
+        moveTween.Join(transform.DORotateQuaternion(currentLayout.transform.rotation, kGotoDuration));
+        moveTween.SetEase(Ease.OutQuad);
         moveTween.OnComplete(OnReachDestination);
     }
 
@@ -61,6 +69,8 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
         if (isGoingTo) return;
         isOnFocus = !isOnFocus;
         currentLayout.UpdateLayout();
+
+        if (currentLayout.IsPickable) EventsManager.Broadcast(new OnPickDrawCard { pickedCard = info });
     }
 
     // Release Click

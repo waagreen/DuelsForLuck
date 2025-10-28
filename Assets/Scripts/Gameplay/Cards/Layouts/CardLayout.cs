@@ -7,7 +7,9 @@ public class CardLayout : MonoBehaviour
     [Header("Base Card Layout")]
     [SerializeField][Min(0.01f)] protected float updateDuration = 0.3f;
     [SerializeField] private bool isPickableLayout;
-    
+
+    public bool IsPickable => isPickableLayout;
+
     protected const float kIndexOffsetZ = 0.001f;
     protected List<CardVisual> cards;
     protected Sequence updateSeq;

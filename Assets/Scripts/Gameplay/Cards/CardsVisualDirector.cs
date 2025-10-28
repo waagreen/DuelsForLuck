@@ -54,35 +54,35 @@ public class CardsVisualDirector : MonoBehaviour
         CreateCards(evt.actor.Hand, hand.Layout); // Create initial hand
     }
 
-    private void InvokeGoTo(List<CardRuntime> cards, Transform destination, CardLayout layout)
+    private void InvokeGoTo(List<CardRuntime> cards, CardLayout layout)
     {
         foreach (CardRuntime card in cards)
         {
-            card.OnMove?.Invoke(destination.position, layout);
+            card.OnMove?.Invoke(layout);
         }
     }
 
     private void SendToDeck(OnSendCardsToDeck evt)
     {
         if (!IsOwnerActor(evt.ownerOrder)) return;
-        InvokeGoTo(evt.cards, deck.transform, deck.Layout);
+        InvokeGoTo(evt.cards, deck.Layout);
     }
 
     private void SendToDiscard(OnSendCardsToDiscard evt)
     {
         if (!IsOwnerActor(evt.ownerOrder)) return;
-        InvokeGoTo(evt.cards, discard.transform, discard.Layout);
+        InvokeGoTo(evt.cards, discard.Layout);
     }
 
     private void SendToHand(OnSendCardsToHand evt)
     {
         if (!IsOwnerActor(evt.ownerOrder)) return;
-        InvokeGoTo(evt.cards, hand.transform, hand.Layout);
+        InvokeGoTo(evt.cards, hand.Layout);
     }
     
     private void SendToDraw(OnSendCardsToDraw evt)
     {
         if (!IsOwnerActor(evt.ownerOrder)) return;
-        InvokeGoTo(evt.cards, draw.transform, draw.Layout);
+        InvokeGoTo(evt.cards, draw.Layout);
     }
 }
