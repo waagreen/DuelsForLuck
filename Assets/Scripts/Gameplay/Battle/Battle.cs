@@ -17,7 +17,7 @@ public class Battle : MonoBehaviour
     private Actor p1 = null;
     private Actor p2 = null;
     private int turnIndex;
-    private bool isVisualsPlaying = false;
+    private bool isVisualDirectorPlaying = false;
     private List<DieRoll> turnResults;
 
     private Actor GetActiveActor() => (turnIndex == 0) ? p1 : p2;
@@ -29,9 +29,11 @@ public class Battle : MonoBehaviour
         else return 1;
     }
 
+    private WaitUntil WaitVisualDirector() => new(() => isVisualDirectorPlaying == false);
+
     private void OnVisualsComplete(OnTurnVisualsComplete evt)
     {
-        isVisualsPlaying = false;
+        isVisualDirectorPlaying = false;
     }
 
     private void ResetForNextRound(OnNextRound evt)
@@ -59,7 +61,7 @@ public class Battle : MonoBehaviour
             opposing.Health -= value.damage;
         }
 
-        StartCoroutine(ResolveTurnSequence());
+        StartCoroutine(ResolveTurn());
     }
 
     private void DrawTurnCards()
@@ -86,9 +88,20 @@ public class Battle : MonoBehaviour
         EventsManager.Broadcast(drawEvent);
     }
 
-    private IEnumerator ResolveTurnSequence()
+    private IEnumerator InitializeTurn()
     {
-        isVisualsPlaying = true;
+        // Wait until camera is positioned for play
+        isVisualDirectorPlaying = true;
+        BroadcastTurnStart();
+        yield return WaitVisualDirector();
+            
+        BroadcastAviablePlay();
+        DrawTurnCards();
+    }
+
+    private IEnumerator ResolveTurn()
+    {
+        isVisualDirectorPlaying = true;
 
         // Broadcast event to start visual director
         EventsManager.Broadcast(new OnTurnResolveBegin()
@@ -101,7 +114,7 @@ public class Battle : MonoBehaviour
         turnResults.Clear();
 
         // Wait until turn result visuals are done playing
-        yield return new WaitUntil(() => isVisualsPlaying == false);
+        yield return WaitVisualDirector();
 
         // Resume turn logic
         turnIndex = (turnIndex + 1) % 2;
@@ -112,14 +125,8 @@ public class Battle : MonoBehaviour
         }
         else
         {
-            BroadcastTurnStart();
-            isVisualsPlaying = true;
+            StartCoroutine(InitializeTurn());
         }
-
-        // Wait until camera is positioned for play
-        yield return new WaitUntil(() => isVisualsPlaying == false);
-        BroadcastAviablePlay();
-        DrawTurnCards();
     }
 
     private void BroadcastTurnStart() => EventsManager.Broadcast(new OnTurnStart() { actor = GetActiveActor() });
@@ -171,6 +178,6 @@ public class Battle : MonoBehaviour
         EventsManager.Broadcast(new OnCreateActor { actor = p1 });
         EventsManager.Broadcast(new OnCreateActor { actor = p2 });
 
-        BroadcastTurnStart();
+        StartCoroutine(InitializeTurn());
     }
 }
