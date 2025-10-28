@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
 {
     [SerializeField] private Image artHolder;
     [SerializeField] private TMP_Text nickname, description;
+    [SerializeField] private List<Renderer> visualElements;
 
     private CardLayout currentLayout;
     private CardRuntime info;

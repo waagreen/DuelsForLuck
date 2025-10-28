@@ -23,16 +23,6 @@ public class DiceManipulator : MonoBehaviour
     private bool isDragging = false;
     private float shakeTimer;
 
-    private void Awake()
-    {
-        EventsManager.AddSubscriber<OnPlayIsAviable>(TryBotPlay);
-    }
-
-    private void OnDestroy()
-    {
-        EventsManager.RemoveSubscriber<OnPlayIsAviable>(TryBotPlay);
-    }
-
     private void Start()
     {
         mainCam = Camera.main;
@@ -44,7 +34,7 @@ public class DiceManipulator : MonoBehaviour
         isDragging = false;
         foreach (Die die in dice)
         {
-            die.Throw(maxRollTorque, maxSpeed);
+            die.Throw(maxRollTorque);
         }
     }
 
@@ -82,15 +72,6 @@ public class DiceManipulator : MonoBehaviour
         }
 
         inputActions.Disable();
-    }
-
-    private void TryBotPlay(OnPlayIsAviable evt)
-    {
-        if (!evt.actor.IsBot) return;
-
-        // We need to initialize the dice velocity, otherwise the condition to broadcast the results will be met immediately
-        foreach (Die die in dice) die.Rb.linearVelocity += Random.Range(0.1f, 0.5f) * maxSpeed * mainCam.transform.up;
-        Drop();
     }
 
     private Vector3 GetPointerWorldPosition()

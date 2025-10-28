@@ -60,7 +60,9 @@ public class Battle : MonoBehaviour
         actor.Discard.AddRange(remainingCards);
         actor.Draw.Clear();
 
+        // Indicates that all possible cards have been picked, and the turn gameplay can commence
         EventsManager.Broadcast(new OnSendCardsToDiscard { cards = remainingCards, ownerOrder = turnIndex });
+        EventsManager.Broadcast(new OnPlayIsAviable() { actor = GetActiveActor() });
     }
 
     private void DrawTurnCards()
@@ -95,7 +97,6 @@ public class Battle : MonoBehaviour
         yield return WaitVisualDirector();
 
         picksThisTurn = 0;
-        BroadcastAviablePlay();
         DrawTurnCards();
     }
 
@@ -150,7 +151,6 @@ public class Battle : MonoBehaviour
     }
 
     private void BroadcastTurnStart() => EventsManager.Broadcast(new OnTurnStart() { actor = GetActiveActor() });
-    private void BroadcastAviablePlay() => EventsManager.Broadcast(new OnPlayIsAviable() { actor = GetActiveActor() });
 
     // Only called when one of the actors has taken fatal damage
     private void CheckGameStatus()

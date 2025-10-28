@@ -86,14 +86,13 @@ public class Die : MonoBehaviour
         colorSequence.Play();
     }
 
-    public void Throw(float maxRollTorque, float maxSpeed)
+    public void Throw(float maxRollTorque)
     {
         col.sharedMaterial = cachedMaterial;
 
         rb.useGravity = true;
         
-        float rollIntensity = Mathf.Lerp(0, maxRollTorque, rb.linearVelocity.magnitude / maxSpeed);
-        Vector3 randomTorque = Random.insideUnitSphere * rollIntensity;
+        Vector3 randomTorque = Random.insideUnitSphere * maxRollTorque;
 
         rb.AddTorque(randomTorque, ForceMode.Impulse);
         rb.AddForce(rb.linearVelocity * 0.5f, ForceMode.Impulse);

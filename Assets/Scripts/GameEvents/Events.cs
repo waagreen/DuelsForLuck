@@ -16,8 +16,6 @@ public class CardsEvent : GameEvent
 #endregion
 
 #region PLAY
-public class OnBotPlay : GameEvent { }
-
 public class OnSendCardsToDeck : CardsEvent { } 
 public class OnSendCardsToHand : CardsEvent { }
 public class OnSendCardsToDiscard : CardsEvent { }
