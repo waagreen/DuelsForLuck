@@ -37,7 +37,6 @@ public class CardLayout : MonoBehaviour
         {
             cards.Add(card);
             card.transform.SetParent(transform);
-            card.UpdateActiveState(false);
             if (ignoreUpdate) return;
             UpdateLayout();
         }
@@ -48,7 +47,6 @@ public class CardLayout : MonoBehaviour
         if (card != null && cards.Remove(card))
         {
             card.transform.SetParent(null);
-            card.UpdateActiveState(true);
             if (ignoreUpdate) return;
             UpdateLayout();
         }

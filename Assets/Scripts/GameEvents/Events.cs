@@ -29,6 +29,7 @@ public class OnPlayIsAviable : ActorEvent { }
 public class OnSelectDie : GameEvent
 {
     public int value;
+    public int id;
 }
 
 public class OnDisselectDie : GameEvent { }

@@ -7,13 +7,14 @@ public class Die : MonoBehaviour
 {
     [Header("Visual Settings")]
     [SerializeField] private List<SpriteRenderer> faces;
+    [SerializeField][Min(0f)] private float selectDuration = 0.15f, jumpPower = 1f, selectScale = 1.1f, baseScale = 0.75f;
     
     [Header("Audio Settings")]
     [SerializeField] private AudioSource audioScr;
     [SerializeField] private List<AudioClip> collisionSounds;
     [SerializeField][Min(0f)] private float minImpactVolume = 0.15f, impactCooldown = 0.1f;
 
-    private Sequence colorSequence;
+    private Sequence colorSeq, selectSeq;
     private Color cachedColor;
     
     private Collider col;
@@ -44,23 +45,60 @@ public class Die : MonoBehaviour
     {
         hasValue = false;
         cachedColor = (evt.actor.Order == 0) ? Actor.PColor : Actor.BotColor;    
+        transform.localScale = Vector3.one * baseScale;
         ColorFaces(cachedColor);
     }
 
     private void Awake()
     {
         EventsManager.AddSubscriber<OnTurnStart>(InitializeForTurn);
+        EventsManager.AddSubscriber<OnSelectDie>(Disselect);
     }
 
     private void OnDestroy()
     {
         EventsManager.RemoveSubscriber<OnTurnStart>(InitializeForTurn);
+        EventsManager.RemoveSubscriber<OnSelectDie>(Disselect);
     }
 
     private void Start()
     {
+        transform.localScale = Vector3.one * baseScale;
+        
         col = GetComponent<Collider>();
         rb = GetComponent<Rigidbody>();
+    }
+
+    private Sequence SelectSequence()
+    {
+        Vector3 targetScale = Vector3.one * (isSelected ? selectScale : baseScale);
+        Vector3 targetJump = transform.position + Vector3.up;
+        Color targetColor = isSelected ? Color.white : cachedColor;
+
+        selectSeq?.Kill();
+        selectSeq = DOTween.Sequence();
+        
+        selectSeq.Append(transform.DOScale(targetScale, selectDuration).SetEase(Ease.OutBack));
+        if (isSelected) selectSeq.Join(transform.DOLocalJump(targetJump, jumpPower, numJumps: 1, selectDuration).SetEase(Ease.OutCubic));
+        selectSeq.Join(ColorFaces(targetColor));
+        
+        return selectSeq;
+    }
+
+    private void ToggleSelection()
+    {
+        isSelected = !isSelected;
+        SelectSequence();
+    }
+    
+    // Player clicked on another die, and this one was already selected
+    private void Disselect(OnSelectDie evt)
+    {
+        if (evt.id == gameObject.GetInstanceID()) return;
+        if (isSelected == false) return;
+
+        isSelected = false;
+        SelectSequence();
     }
 
     public void OnMouseDown()
@@ -68,11 +106,12 @@ public class Die : MonoBehaviour
         if (!CanInteract()) return;
 
         OnGrab?.Invoke();
-        isSelected = !isSelected;
-
-        if (isSelected) EventsManager.Broadcast(new OnSelectDie { value = this.value });
-        else EventsManager.Broadcast(new OnDisselectDie());
+        ToggleSelection();
+            
+        if (isSelected) EventsManager.Broadcast(new OnSelectDie { value = this.value, id = gameObject.GetInstanceID() });
+        else EventsManager.Broadcast(new OnDisselectDie()); 
     }
+
     public void OnMouseUp()
     {
         if (!CanInteract()) return;
@@ -80,19 +119,18 @@ public class Die : MonoBehaviour
         OnDrop?.Invoke();
     }
 
-    private void ColorFaces(Color colr)
+    private Sequence ColorFaces(Color colr)
     {
-        colorSequence?.Kill();
-        colorSequence = DOTween.Sequence();
-        colorSequence.AppendInterval(0.1f);
+        colorSeq?.Kill();
+        colorSeq = DOTween.Sequence();
 
         foreach (SpriteRenderer rend in faces)
         {
-            colorSequence.Join(rend.DOColor(colr, 0.2f));
+            colorSeq.Join(rend.DOColor(colr, 0.2f));
         }
+        colorSeq.SetEase(Ease.OutCubic);
 
-        colorSequence.SetEase(Ease.OutCubic);
-        colorSequence.Play();
+        return colorSeq;
     }
 
     public void Throw(float maxRollTorque)
@@ -107,21 +145,6 @@ public class Die : MonoBehaviour
         rb.AddForce(rb.linearVelocity * 0.5f, ForceMode.Impulse);
 
         wasThrown = true;
-    }
-
-    public void GoToHand()
-    {
-        wasThrown = false;
-
-        rb.useGravity = false;
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.rotation = Quaternion.identity;
-
-        cachedMaterial = col.sharedMaterial;
-        col.sharedMaterial = null;
-    
-        ColorFaces(cachedColor);
     }
 
     private int GetTopFace()

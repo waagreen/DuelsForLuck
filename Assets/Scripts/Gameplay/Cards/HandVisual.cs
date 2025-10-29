@@ -34,7 +34,9 @@ public class HandVisual : MonoBehaviour
 
     private void UpdateHandState(OnTurnStart evt)
     {
-        // Disable cards on turn statr
+        if (layout.IsPickable) return;
+
+        // Disable cards on turn start
         isActive = evt.actor.Order == ownerStartingOrder;
         foreach (CardVisual card in layout.Cards)
         {
