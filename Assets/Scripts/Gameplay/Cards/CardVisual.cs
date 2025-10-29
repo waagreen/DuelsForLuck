@@ -8,12 +8,12 @@ using UnityEngine.UI;
 public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] private Image artHolder;
-    [SerializeField] private TMP_Text nickname, description;
-    [SerializeField] private List<Renderer> visualElements;
+    [SerializeField] private TMP_Text nickname, description, cost;
+    [SerializeField] private List<Graphic> visualElements;
 
     private CardLayout currentLayout;
     private CardRuntime info;
-    private Sequence moveTween;
+    private Sequence moveSeq, stateSeq;
     private bool isGoingTo, isOnFocus, isHovering;
     private const float kGotoDuration = 0.6f;
 
@@ -32,6 +32,7 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
         artHolder.sprite = info.Artwork;
         nickname.SetText(info.Nickname);
         description.SetText(info.Description);
+        cost.SetText(info.Cost.ToString());
     }
 
     private void OnDestroy()
@@ -57,12 +58,41 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
         currentLayout.RemoveCard(this);
         currentLayout = newLayout;
 
-        moveTween?.Kill();
-        moveTween = DOTween.Sequence();
-        moveTween.Append(transform.DOMove(currentLayout.transform.position, kGotoDuration));
-        moveTween.Join(transform.DORotateQuaternion(currentLayout.transform.rotation, kGotoDuration));
-        moveTween.SetEase(Ease.OutQuad);
-        moveTween.OnComplete(OnReachDestination);
+        moveSeq?.Kill();
+        moveSeq = DOTween.Sequence();
+        moveSeq.Append(transform.DOMove(currentLayout.transform.position, kGotoDuration));
+        moveSeq.Join(transform.DORotateQuaternion(currentLayout.transform.rotation, kGotoDuration));
+        moveSeq.SetEase(Ease.OutQuad);
+        moveSeq.OnComplete(OnReachDestination);
+    }
+
+    public void UpdateActiveState(bool flag)
+    {
+        stateSeq?.Kill();
+        stateSeq = DOTween.Sequence();
+        Color color = flag ? Color.white : Color.grey;
+
+        foreach (Graphic graphic in visualElements)
+        {
+            stateSeq.Join(graphic.DOColor(color, kGotoDuration));
+        }
+        stateSeq.SetEase(Ease.OutQuad);
+        stateSeq.Play();
+    }
+
+    public void UpdateCostState(int selectedDieValue)
+    {
+        if (selectedDieValue < 0)
+        {
+            cost.color = Color.white;
+            UpdateActiveState(false);
+        }
+        else
+        {
+            bool canUse = selectedDieValue >= info.Cost;
+            cost.color = canUse ? Color.green : Color.red;
+            UpdateActiveState(canUse);
+        }
     }
 
     // Clicked

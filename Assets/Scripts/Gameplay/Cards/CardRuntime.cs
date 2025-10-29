@@ -7,11 +7,13 @@ public class CardRuntime
 {
     private string nickname;
     private string description;
+    private int cost;
     private Sprite artwork;
     private List<EffectRuntime> currentEffects;
 
     public string Nickname => nickname;
     public string Description => description;
+    public int Cost => cost;
     public Sprite Artwork => artwork;
     public List<EffectRuntime> CurrentEffects => currentEffects;
 
@@ -22,6 +24,7 @@ public class CardRuntime
         nickname = data.nickname;
         description = data.description;
         artwork = data.artwork;
+        cost = data.baseCost;
 
         currentEffects = new();
 

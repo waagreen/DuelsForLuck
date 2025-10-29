@@ -20,9 +20,11 @@ public class Die : MonoBehaviour
     private Rigidbody rb;
     private PhysicsMaterial cachedMaterial;
     
-    private bool wasThrown = false;
+    private bool wasThrown, hasValue, isSelected;
     private int value;
     private float lastImpact;
+
+    public bool CanInteract() => (wasThrown == false) && hasValue;
     
     private readonly Vector3[] faceNormals = new Vector3[]
     {
@@ -38,20 +40,21 @@ public class Die : MonoBehaviour
     public event System.Action OnGrab;
     public event System.Action OnDrop;
 
-    private void UpdateTurnVisuals(OnTurnStart evt)
+    private void InitializeForTurn(OnTurnStart evt)
     {
+        hasValue = false;
         cachedColor = (evt.actor.Order == 0) ? Actor.PColor : Actor.BotColor;    
         ColorFaces(cachedColor);
     }
 
     private void Awake()
     {
-        EventsManager.AddSubscriber<OnTurnStart>(UpdateTurnVisuals);
+        EventsManager.AddSubscriber<OnTurnStart>(InitializeForTurn);
     }
 
     private void OnDestroy()
     {
-        EventsManager.RemoveSubscriber<OnTurnStart>(UpdateTurnVisuals);
+        EventsManager.RemoveSubscriber<OnTurnStart>(InitializeForTurn);
     }
 
     private void Start()
@@ -62,12 +65,18 @@ public class Die : MonoBehaviour
 
     public void OnMouseDown()
     {
-        if (wasThrown) return;
+        if (!CanInteract()) return;
+
         OnGrab?.Invoke();
+        isSelected = !isSelected;
+
+        if (isSelected) EventsManager.Broadcast(new OnSelectDie { value = this.value });
+        else EventsManager.Broadcast(new OnDisselectDie());
     }
     public void OnMouseUp()
     {
-        if (wasThrown) return;
+        if (!CanInteract()) return;
+        
         OnDrop?.Invoke();
     }
 
@@ -132,7 +141,9 @@ public class Die : MonoBehaviour
             }
         }
 
-        return topFace;
+        if (topFace == 1) return 0;
+        else if (topFace == 6) return 2;
+        else return 1;
     }
 
     private void HandleCollisionSound(Collision collision)
@@ -159,10 +170,10 @@ public class Die : MonoBehaviour
     {
         if (wasThrown && (rb.linearVelocity == Vector3.zero))
         {
-            wasThrown = false;
             value = GetTopFace();
             
-            EventsManager.Broadcast(new OnDieResult { result = value });
+            wasThrown = false;
+            hasValue = true;
         }
     }
 

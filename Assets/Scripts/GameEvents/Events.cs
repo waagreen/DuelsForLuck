@@ -26,11 +26,13 @@ public class OnPickDrawCard : GameEvent
 }
 
 public class OnPlayIsAviable : ActorEvent { }
-
-public class OnDieResult : GameEvent
+public class OnSelectDie : GameEvent
 {
-    public int result;
+    public int value;
 }
+
+public class OnDisselectDie : GameEvent { }
+
 #endregion
 
 #region VISUAL FEEDBACK

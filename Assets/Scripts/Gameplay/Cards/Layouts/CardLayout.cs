@@ -9,6 +9,7 @@ public class CardLayout : MonoBehaviour
     [SerializeField] private bool isPickableLayout;
 
     public bool IsPickable => isPickableLayout;
+    public List<CardVisual> Cards => cards;
 
     protected const float kIndexOffsetZ = 0.001f;
     protected List<CardVisual> cards;
@@ -36,6 +37,7 @@ public class CardLayout : MonoBehaviour
         {
             cards.Add(card);
             card.transform.SetParent(transform);
+            card.UpdateActiveState(false);
             if (ignoreUpdate) return;
             UpdateLayout();
         }
@@ -46,6 +48,7 @@ public class CardLayout : MonoBehaviour
         if (card != null && cards.Remove(card))
         {
             card.transform.SetParent(null);
+            card.UpdateActiveState(true);
             if (ignoreUpdate) return;
             UpdateLayout();
         }

@@ -22,13 +22,6 @@ public class Battle : MonoBehaviour
 
     private Actor GetActiveActor() => (turnIndex == 0) ? p1 : p2;
     private Actor GetPassiveActor() => (turnIndex == 0) ? p2 : p1;
-    private int GetDamage(int value)
-    {
-        if (value == 1) return 0;
-        else if (value == 6) return 2;
-        else return 1;
-    }
-
     private WaitUntil WaitVisualDirector() => new(() => isVisualDirectorPlaying == false);
 
     private void OnVisualsComplete(OnTurnVisualsComplete evt)
@@ -130,26 +123,6 @@ public class Battle : MonoBehaviour
         }
     }
 
-    private void HandleDieResult(OnDieResult evt)
-    {
-        DieRoll roll = new()
-        {
-            value = evt.result,
-            damage = GetDamage(evt.result)
-        };
-        turnResults.Add(roll);
-
-        if (turnResults.Count != GetActiveActor().DiceAmount) return;
-
-        Actor opposing = GetPassiveActor();
-        foreach (DieRoll value in turnResults)
-        {
-            opposing.Health -= value.damage;
-        }
-
-        StartCoroutine(ResolveTurn());
-    }
-
     private void BroadcastTurnStart() => EventsManager.Broadcast(new OnTurnStart() { actor = GetActiveActor() });
 
     // Only called when one of the actors has taken fatal damage
@@ -174,7 +147,6 @@ public class Battle : MonoBehaviour
 
     private void Awake()
     {
-        EventsManager.AddSubscriber<OnDieResult>(HandleDieResult);
         EventsManager.AddSubscriber<OnNextRound>(ResetForNextRound);
         EventsManager.AddSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
         EventsManager.AddSubscriber<OnPickDrawCard>(ResolveDrawPick);
@@ -182,7 +154,6 @@ public class Battle : MonoBehaviour
 
     private void OnDestroy()
     {
-        EventsManager.RemoveSubscriber<OnDieResult>(HandleDieResult);
         EventsManager.RemoveSubscriber<OnNextRound>(ResetForNextRound);
         EventsManager.RemoveSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
         EventsManager.RemoveSubscriber<OnPickDrawCard>(ResolveDrawPick);
