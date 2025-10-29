@@ -13,6 +13,7 @@ public class HandVisual : MonoBehaviour
         EventsManager.AddSubscriber<OnTurnStart>(UpdateHandState);
         EventsManager.AddSubscriber<OnSelectDie>(UpdateCardsCostState);
         EventsManager.AddSubscriber<OnDisselectDie>(ResetCostAndDisableCards);
+        EventsManager.AddSubscriber<OnPlayCard>(ResetCostAndDisableCards);
 
     }
 
@@ -21,15 +22,25 @@ public class HandVisual : MonoBehaviour
         EventsManager.RemoveSubscriber<OnTurnStart>(UpdateHandState);
         EventsManager.RemoveSubscriber<OnSelectDie>(UpdateCardsCostState);
         EventsManager.RemoveSubscriber<OnDisselectDie>(ResetCostAndDisableCards);
+        EventsManager.RemoveSubscriber<OnPlayCard>(ResetCostAndDisableCards);
+    }
+
+    private void ResetCostAndDisableCards()
+    {
+        foreach (CardVisual card in layout.Cards)
+        {
+            card.UpdateCostState(-1);
+        }
     }
 
     private void ResetCostAndDisableCards(OnDisselectDie evt)
     {
-        foreach (CardVisual card in layout.Cards)
-        {
-            card.UpdateActiveState(false);
-            card.UpdateCostState(-1);
-        }
+        ResetCostAndDisableCards();
+    }
+
+    private void ResetCostAndDisableCards(OnPlayCard evt)
+    {
+        ResetCostAndDisableCards();
     }
 
     private void UpdateHandState(OnTurnStart evt)

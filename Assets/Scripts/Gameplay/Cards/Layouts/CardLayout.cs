@@ -6,7 +6,7 @@ public class CardLayout : MonoBehaviour
 {
     [Header("Base Card Layout")]
     [SerializeField][Min(0.01f)] protected float updateDuration = 0.3f;
-    [SerializeField] private bool isPickableLayout;
+    [SerializeField] private bool isPickableLayout, disableOnEnter;
 
     public bool IsPickable => isPickableLayout;
     public List<CardVisual> Cards => cards;
@@ -15,20 +15,12 @@ public class CardLayout : MonoBehaviour
     protected List<CardVisual> cards;
     protected Sequence updateSeq;
 
-    protected virtual void Awake()
-    {
-    }
-
+    protected virtual void Awake() { }
     protected virtual void Start()
     {
         cards = new();
     }
-
-    protected virtual void OnDestroy()
-    {
-        
-    }
-
+    protected virtual void OnDestroy() { }
     public virtual void UpdateLayout() { }
 
     public virtual void AddCard(CardVisual card, bool ignoreUpdate = false)
@@ -37,6 +29,7 @@ public class CardLayout : MonoBehaviour
         {
             cards.Add(card);
             card.transform.SetParent(transform);
+            if (disableOnEnter) card.UpdateActiveState(false);
             if (ignoreUpdate) return;
             UpdateLayout();
         }
@@ -47,6 +40,7 @@ public class CardLayout : MonoBehaviour
         if (card != null && cards.Remove(card))
         {
             card.transform.SetParent(null);
+            if (disableOnEnter) card.UpdateActiveState(true);
             if (ignoreUpdate) return;
             UpdateLayout();
         }

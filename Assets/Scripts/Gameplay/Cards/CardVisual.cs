@@ -14,7 +14,7 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
     private CardLayout currentLayout;
     private CardRuntime info;
     private Sequence moveSeq, stateSeq;
-    private bool isGoingTo, isOnFocus, isHovering;
+    private bool isGoingTo, isOnFocus, isHovering, canBePlayed;
     private const float kGotoDuration = 0.6f;
 
     public bool IsOnFocus => isOnFocus;
@@ -86,12 +86,13 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
         {
             cost.color = Color.white;
             UpdateActiveState(false);
+            canBePlayed = false;
         }
         else
         {
-            bool canUse = selectedDieValue >= info.Cost;
-            cost.color = canUse ? Color.green : Color.red;
-            UpdateActiveState(canUse);
+            canBePlayed = selectedDieValue >= info.Cost;
+            cost.color = canBePlayed ? Color.green : Color.red;
+            UpdateActiveState(canBePlayed);
         }
     }
 
@@ -102,7 +103,8 @@ public class CardVisual : MonoBehaviour, IPointerUpHandler, IPointerDownHandler,
         isOnFocus = !isOnFocus;
         currentLayout.UpdateLayout();
 
-        if (currentLayout.IsPickable) EventsManager.Broadcast(new OnPickDrawCard { pickedCard = info });
+        if (currentLayout.IsPickable) EventsManager.Broadcast(new OnPickDrawCard { card = info });
+        else if (canBePlayed) EventsManager.Broadcast(new OnPlayCard { card = info });
     }
 
     // Release Click

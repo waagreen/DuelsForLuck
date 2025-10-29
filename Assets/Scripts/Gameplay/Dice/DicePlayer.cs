@@ -8,7 +8,7 @@ public class DicePlayer : MonoBehaviour
     [Header("Explosion Settings")]
     [SerializeField][Min(0f)] private float radius = 5f;
     [SerializeField][Min(0f)] private float power = 10f, upwardsModifier = 10f;
-    [SerializeField][Range(0f, 20f)] float maxRollTorque = 3f;
+    [SerializeField][Range(0f, 1f)] float maxRollTorque = 1f;
 
     private List<Vector3> diceInitialPosition;
 

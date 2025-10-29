@@ -7,21 +7,23 @@ public class Die : MonoBehaviour
 {
     [Header("Visual Settings")]
     [SerializeField] private List<SpriteRenderer> faces;
-    [SerializeField][Min(0f)] private float selectDuration = 0.15f, jumpPower = 1f, selectScale = 1.1f, baseScale = 0.75f;
+    [SerializeField][Min(0f)] private float removeDuration = 0.1f, selectDuration = 0.15f;
+    [SerializeField][Min(0f)] private float selectScale = 1.1f, baseScale = 0.75f;
+    [SerializeField][Min(0f)] private float jumpPower = 1f, jumpScale = 0.25f;
     
     [Header("Audio Settings")]
     [SerializeField] private AudioSource audioScr;
     [SerializeField] private List<AudioClip> collisionSounds;
     [SerializeField][Min(0f)] private float minImpactVolume = 0.15f, impactCooldown = 0.1f;
 
-    private Sequence colorSeq, selectSeq;
+    private Sequence colorSeq, selectSeq, removeSeq;
     private Color cachedColor;
     
     private Collider col;
     private Rigidbody rb;
     private PhysicsMaterial cachedMaterial;
     
-    private bool wasThrown, hasValue, isSelected;
+    private bool wasThrown, hasValue, isSelected, isOutOfPlay;
     private int value;
     private float lastImpact;
 
@@ -44,35 +46,19 @@ public class Die : MonoBehaviour
     private void InitializeForTurn(OnTurnStart evt)
     {
         hasValue = false;
-        cachedColor = (evt.actor.Order == 0) ? Actor.PColor : Actor.BotColor;    
+        isOutOfPlay = false;
+        isSelected = false;
+        wasThrown = false;
+
+        cachedColor = (evt.actor.Order == 0) ? Actor.PColor : Actor.BotColor;
         transform.localScale = Vector3.one * baseScale;
         ColorFaces(cachedColor);
-    }
-
-    private void Awake()
-    {
-        EventsManager.AddSubscriber<OnTurnStart>(InitializeForTurn);
-        EventsManager.AddSubscriber<OnSelectDie>(Disselect);
-    }
-
-    private void OnDestroy()
-    {
-        EventsManager.RemoveSubscriber<OnTurnStart>(InitializeForTurn);
-        EventsManager.RemoveSubscriber<OnSelectDie>(Disselect);
-    }
-
-    private void Start()
-    {
-        transform.localScale = Vector3.one * baseScale;
-        
-        col = GetComponent<Collider>();
-        rb = GetComponent<Rigidbody>();
     }
 
     private Sequence SelectSequence()
     {
         Vector3 targetScale = Vector3.one * (isSelected ? selectScale : baseScale);
-        Vector3 targetJump = transform.position + Vector3.up;
+        Vector3 targetJump = transform.position + (Vector3.up * jumpScale);
         Color targetColor = isSelected ? Color.white : cachedColor;
 
         selectSeq?.Kill();
@@ -87,15 +73,33 @@ public class Die : MonoBehaviour
 
     private void ToggleSelection()
     {
+        if (isOutOfPlay) return;
+
         isSelected = !isSelected;
         SelectSequence();
     }
     
+    private void RemoveFromPlay(OnPlayCard evt)
+    {
+        if (!isSelected) return;
+
+        float targetJump = (transform.position + (Vector3.up * jumpScale)).y;
+        
+        removeSeq?.Kill();
+        removeSeq = DOTween.Sequence();
+
+        removeSeq.Append(transform.DOLocalMoveY(targetJump, removeDuration).SetEase(Ease.OutQuad));
+        removeSeq.Append(transform.DOScale(Vector3.zero, removeDuration / 3f).SetEase(Ease.InCirc));
+        removeSeq.OnComplete(() => isOutOfPlay = true);
+        removeSeq.Play();
+    }
+
     // Player clicked on another die, and this one was already selected
     private void Disselect(OnSelectDie evt)
     {
         if (evt.id == gameObject.GetInstanceID()) return;
         if (isSelected == false) return;
+        if (isOutOfPlay) return;
 
         isSelected = false;
         SelectSequence();
@@ -135,16 +139,14 @@ public class Die : MonoBehaviour
 
     public void Throw(float maxRollTorque)
     {
-        col.sharedMaterial = cachedMaterial;
-
-        rb.useGravity = true;
-        
-        Vector3 randomTorque = Random.insideUnitSphere * maxRollTorque;
-
-        rb.AddTorque(randomTorque, ForceMode.Impulse);
-        rb.AddForce(rb.linearVelocity * 0.5f, ForceMode.Impulse);
-
         wasThrown = true;
+        rb.useGravity = true;
+
+        Vector3 aditionalAxis = (Random.Range(0f, 1f) > 0.5f) ? transform.right : transform.up;
+        Vector3 torque = maxRollTorque * (transform.forward + aditionalAxis);
+
+        rb.AddTorque(torque, ForceMode.Impulse);
+        rb.AddForce(rb.linearVelocity * 0.5f, ForceMode.Impulse);
     }
 
     private int GetTopFace()
@@ -203,5 +205,27 @@ public class Die : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         HandleCollisionSound(collision);
+    }
+
+    private void Awake()
+    {
+        EventsManager.AddSubscriber<OnTurnStart>(InitializeForTurn);
+        EventsManager.AddSubscriber<OnSelectDie>(Disselect);
+        EventsManager.AddSubscriber<OnPlayCard>(RemoveFromPlay);
+    }
+
+    private void OnDestroy()
+    {
+        EventsManager.RemoveSubscriber<OnTurnStart>(InitializeForTurn);
+        EventsManager.RemoveSubscriber<OnSelectDie>(Disselect);
+        EventsManager.RemoveSubscriber<OnPlayCard>(RemoveFromPlay);
+    }
+
+    private void Start()
+    {
+        transform.localScale = Vector3.one * baseScale;
+        
+        col = GetComponent<Collider>();
+        rb = GetComponent<Rigidbody>();
     }
 }

@@ -1452,8 +1452,12 @@ PrefabInstance:
       value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
+      propertyPath: baseScale
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: jumpPower
-      value: 0.1
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: rollForce
@@ -1496,8 +1500,12 @@ PrefabInstance:
       value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
+      propertyPath: removeDuration
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: selectDuration
-      value: 0.3
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: shakeIntensity
@@ -2272,6 +2280,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateDuration: 0.3
   isPickableLayout: 0
+  disableOnEnter: 1
   xyBounds: {x: 5, y: 0.15}
   spacing: 0.75
   arcDeggres: 10
@@ -2358,10 +2367,10 @@ MonoBehaviour:
   dice:
   - {fileID: 2092434524}
   - {fileID: 1931093855}
-  radius: 6
-  power: 7
-  upwardsModifier: 1.2
-  maxRollTorque: 11
+  radius: 5
+  power: 6
+  upwardsModifier: 0.9
+  maxRollTorque: 0.85
 --- !u!1 &861954086
 GameObject:
   m_ObjectHideFlags: 0
@@ -2408,6 +2417,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateDuration: 0.3
   isPickableLayout: 1
+  disableOnEnter: 0
   xyBounds: {x: 6, y: 0}
   spacing: 1
   arcDeggres: 0
@@ -2568,6 +2578,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateDuration: 0.3
   isPickableLayout: 0
+  disableOnEnter: 0
   heightOffset: 0.035
 --- !u!114 &1052555287
 MonoBehaviour:
@@ -2630,6 +2641,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateDuration: 0.3
   isPickableLayout: 0
+  disableOnEnter: 0
   heightOffset: 0.035
 --- !u!114 &1097848293
 MonoBehaviour:
@@ -2692,6 +2704,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateDuration: 0.3
   isPickableLayout: 0
+  disableOnEnter: 0
   heightOffset: 0.035
 --- !u!114 &1268406581
 MonoBehaviour:
@@ -2768,6 +2781,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateDuration: 0.3
   isPickableLayout: 1
+  disableOnEnter: 0
   xyBounds: {x: 6, y: 0}
   spacing: 1
   arcDeggres: 0
@@ -3130,6 +3144,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateDuration: 0.3
   isPickableLayout: 0
+  disableOnEnter: 0
   heightOffset: 0.035
 --- !u!114 &1553236678
 MonoBehaviour:
@@ -3206,6 +3221,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateDuration: 0.3
   isPickableLayout: 0
+  disableOnEnter: 1
   xyBounds: {x: 5, y: 0.15}
   spacing: 0.75
   arcDeggres: 10
@@ -4656,20 +4672,28 @@ PrefabInstance:
     m_TransformParent: {fileID: 859549338}
     m_Modifications:
     - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
+      propertyPath: baseScale
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: jumpPower
-      value: 0.1
+      value: 0.025
       objectReference: {fileID: 0}
     - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: selectScale
-      value: 1
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: impactCooldown
       value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
+      propertyPath: removeDuration
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: selectDuration
-      value: 0.3
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 1927771269462148412, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: minImpactVolume

@@ -1,37 +1,37 @@
 using System.Collections.Generic;
 
 #region BASE EVENTS
-public class GameEvent { }
 
+public class GameEvent { }
 public class ActorEvent : GameEvent
 {
     public Actor actor;
 }
-
 public class CardsEvent : GameEvent
 {
     public List<CardRuntime> cards;
     public int ownerOrder;
 }
+public class CardEvent : GameEvent
+{
+    public CardRuntime card;
+}
 #endregion
 
 #region PLAY
+
 public class OnSendCardsToDeck : CardsEvent { } 
 public class OnSendCardsToHand : CardsEvent { }
 public class OnSendCardsToDiscard : CardsEvent { }
 public class OnSendCardsToDraw : CardsEvent { }
-public class OnPickDrawCard : GameEvent
-{
-    public CardRuntime pickedCard;
-}
-
+public class OnPlayCard : CardEvent { }
+public class OnPickDrawCard : CardEvent { }
 public class OnPlayIsAviable : ActorEvent { }
 public class OnSelectDie : GameEvent
 {
     public int value;
     public int id;
 }
-
 public class OnDisselectDie : GameEvent { }
 
 #endregion
