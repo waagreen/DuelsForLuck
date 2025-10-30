@@ -3,8 +3,14 @@ using UnityEngine;
 public class DamageEffectRuntime : EffectRuntime
 {
     public int damage;
-    public override void Execute()
+    public override void Execute(Actor self, Actor other)
     {
-        Debug.Log($"{GetType()} <color=#F53229>NOT IMPLEMENTED YET!</color>");
+        other.UpdateHealth(-damage);
+        EventsManager.Broadcast(new OnEffectVisualsTrigger
+        {
+            effectType = CardEffectType.Damage,
+            value = -damage,
+            target = other
+        });
     }
 }

@@ -2,8 +2,14 @@ using UnityEngine;
 
 public class RerollDiceEffectRuntime : EffectRuntime
 {
-    public override void Execute()
+    public override void Execute(Actor self, Actor other)
     {
-        Debug.Log($"{GetType()} <color=#F53229>NOT IMPLEMENTED YET!</color>");
+        self.ApplyStatus(CardEffectType.Rerolls, 1);
+        EventsManager.Broadcast(new OnEffectVisualsTrigger
+        {
+            effectType = CardEffectType.Rerolls,
+            value = 1,
+            target = self
+        });
     }
 }

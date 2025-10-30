@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class CardRuntime
@@ -35,11 +34,11 @@ public class CardRuntime
         }
     }
 
-    public void OnPlay()
+    public void OnPlay(Actor self, Actor other)
     {
         foreach (EffectRuntime effect in currentEffects)
         {
-            effect.Execute();
+            effect.Execute(self, other);
         }
     }
 }

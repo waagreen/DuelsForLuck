@@ -3,8 +3,14 @@ using UnityEngine;
 public class DefenseEffectRuntime : EffectRuntime
 {
     public int defense;
-    public override void Execute()
+    public override void Execute(Actor self, Actor other)
     {
-        Debug.Log($"{GetType()} <color=#F53229>NOT IMPLEMENTED YET!</color>");
+        self.ApplyStatus(CardEffectType.Armor, defense);
+        EventsManager.Broadcast(new OnEffectVisualsTrigger
+        {
+            effectType = CardEffectType.Armor,
+            value = defense,
+            target = self
+        });
     }
 }

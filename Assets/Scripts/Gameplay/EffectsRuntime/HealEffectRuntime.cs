@@ -3,8 +3,14 @@ using UnityEngine;
 public class HealEffectRuntime : EffectRuntime
 {
     public int heal;
-    public override void Execute()
+    public override void Execute(Actor self, Actor other)
     {
-        Debug.Log($"{GetType()} <color=#F53229>NOT IMPLEMENTED YET!</color>");
+        self.UpdateHealth(heal);
+        EventsManager.Broadcast(new OnEffectVisualsTrigger
+        {
+            effectType = CardEffectType.Heal,
+            value = heal,
+            target = self
+        });
     }
 }

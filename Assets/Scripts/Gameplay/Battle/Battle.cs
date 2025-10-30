@@ -11,7 +11,7 @@ public struct DieRoll
 
 public class Battle : MonoBehaviour
 {
-    [SerializeField] private int initalPlayersHealth = 10, initialDiceAmount = 2, drawCardsPerTurn = 3;
+    [SerializeField] private int initalPlayersHealth = 10, drawCardsPerTurn = 3;
     [SerializeField] private StartingDeck testDeck;
 
     private Actor p1 = null;
@@ -31,10 +31,8 @@ public class Battle : MonoBehaviour
 
     private void ResetForNextRound(OnNextRound evt)
     {
-        p1.Health = initalPlayersHealth;
-        p2.Health = initalPlayersHealth;
-
-        EventsManager.Broadcast(new OnActorHealthChange { dealtaHealth = initalPlayersHealth });
+        p1.ResetHealth();
+        p2.ResetHealth();
     }
 
     private void ResolveCardPlay(OnPlayCard evt)
@@ -43,7 +41,7 @@ public class Battle : MonoBehaviour
 
         actor.Hand.Remove(evt.card);
         actor.Discard.Add(evt.card);
-        evt.card.OnPlay();
+        evt.card.OnPlay(actor, GetPassiveActor());
 
         EventsManager.Broadcast(new OnSendCardsToDiscard { cards = new(){evt.card}, ownerOrder = turnIndex });
     }
@@ -145,13 +143,10 @@ public class Battle : MonoBehaviour
         else
         {
             // No one reached 2 wins, we go the the next round.
-            p1.Health = initalPlayersHealth;
-            p2.Health = initalPlayersHealth;
-
             Actor winner = p1.Health <= 0 ? p2 : p1;
             winner.WinRound();
 
-            EventsManager.Broadcast(new OnRoundEnd());
+            EventsManager.Broadcast(new OnRoundEnd { actor = winner });
         }
     }
 
@@ -176,8 +171,8 @@ public class Battle : MonoBehaviour
         turnIndex = 0;
         turnResults = new();
         
-        p1 = new(turnIndex, initalPlayersHealth, initialDiceAmount, false, testDeck);
-        p2 = new(turnIndex + 1, initalPlayersHealth, initialDiceAmount, true, testDeck);
+        p1 = new(turnIndex, initalPlayersHealth, false, testDeck);
+        p2 = new(turnIndex + 1, initalPlayersHealth, true, testDeck);
 
         // Broadcast newly created players and decks
         EventsManager.Broadcast(new OnCreateActor { actor = p1 });

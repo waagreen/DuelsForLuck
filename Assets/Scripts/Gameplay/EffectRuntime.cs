@@ -5,5 +5,5 @@ public abstract class EffectRuntime
 {
     public int cost;
 
-    public abstract void Execute();
+    public abstract void Execute(Actor self, Actor other);
 }

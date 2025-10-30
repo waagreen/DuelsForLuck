@@ -9,7 +9,7 @@ public class EndTurnScreen : MonoBehaviour
 
     private void UpdateMessage(OnRoundEnd evt)
     {
-        string winner = (evt.winner == 0) ? "<color=#3B8ACC>BLUE</color>" : "<color=#CC3B8A>RED</color>";
+        string winner = (evt.actor.Order == 0) ? "<color=#3B8ACC>BLUE</color>" : "<color=#CC3B8A>RED</color>";
         message.SetText($"{winner} Win! \n\nFirst to wins two rounds \ntakes the game");
 
         messageSeq?.Kill();
