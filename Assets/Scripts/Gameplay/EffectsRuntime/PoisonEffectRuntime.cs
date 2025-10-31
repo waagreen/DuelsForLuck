@@ -6,11 +6,12 @@ public class PoisonEffectRuntime : EffectRuntime
     public override void Execute(Actor self, Actor other)
     {
         other.ApplyStatus(CardEffectType.Poison, duration);
-        EventsManager.Broadcast(new OnEffectVisualsTrigger
+        EventsManager.Broadcast(new OnCardEffect
         {
             effectType = CardEffectType.Poison,
             value = duration,
-            target = other
+            target = other,
+            targetType = CardEffectTarget.Other
         });
     }
 }

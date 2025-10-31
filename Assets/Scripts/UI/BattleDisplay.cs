@@ -7,53 +7,80 @@ public class BattleDisplay : MonoBehaviour
     [Header("References")]
     [SerializeField] private Canvas display;
     [SerializeField] private RectTransform diceHolder;
-    [SerializeField] private DieDisplay diePrefab;
     [SerializeField] private ActorModel model;
     [SerializeField][Range(0, 1)] private int damageFrom;
 
-    private List<DieDisplay> diceRepresentation;
 
     private void Start()
     {
-        diceRepresentation = new();
+        
+    }
 
-        for (int i = 0; i < 5; i++)
+
+    private Sequence Damage()
+    {
+        Sequence effectSeq = DOTween.Sequence();
+
+        effectSeq.Append(model.Hurt());
+        effectSeq.Join(model.Colorize(Color.white));
+        effectSeq.JoinCallback(() => model.PlaySound(CardEffectType.Damage));
+        
+        return effectSeq;
+    }
+
+    private Sequence Armor()
+    {
+        Sequence effectSeq = DOTween.Sequence();
+        effectSeq.JoinCallback(() => model.PlaySound(CardEffectType.Armor));
+
+        return effectSeq;
+    }
+
+    private Sequence Heal()
+    {
+        Sequence effectSeq = DOTween.Sequence();
+        effectSeq.JoinCallback(() => model.PlaySound(CardEffectType.Heal));
+
+        return effectSeq;
+    }
+
+    private Sequence Poison()
+    {
+        Sequence effectSeq = DOTween.Sequence();
+
+        effectSeq.Join(model.Colorize(Color.magenta));
+        effectSeq.JoinCallback(() => model.PlaySound(CardEffectType.Poison));
+
+        return effectSeq;
+    }
+
+    private Sequence Reroll()
+    {
+        Sequence effectSeq = DOTween.Sequence();
+        effectSeq.JoinCallback(() => model.PlaySound(CardEffectType.Reroll));
+
+        return effectSeq;
+    }
+
+    private Sequence StoreEnergy()
+    {
+        Sequence effectSeq = DOTween.Sequence();
+        effectSeq.JoinCallback(() => model.PlaySound(CardEffectType.StoreEnergy));
+
+        return effectSeq;
+    }
+    
+    public Sequence GetEffectSequence(CardEffectType type)
+    {
+        return type switch
         {
-            DieDisplay die = Instantiate(diePrefab, diceHolder);
-            die.VisualSetup((damageFrom == 0) ? Actor.PColor : Actor.BotColor);
-            diceRepresentation.Add(die);
-        }
+            CardEffectType.Damage => Damage(),
+            CardEffectType.Armor => Armor(),
+            CardEffectType.Heal => Heal(),
+            CardEffectType.Poison => Poison(),
+            CardEffectType.Reroll => Reroll(),
+            CardEffectType.StoreEnergy => StoreEnergy(),
+            _ => null,
+        };
     }
-
-    public Tween ShowDieFace(int dieIndex, int faceValue, float duration)
-    {
-        if (dieIndex < 0 || dieIndex >= diceRepresentation.Count) return null;
-        return diceRepresentation[dieIndex].ShowFace(faceValue, duration);
-    }
-
-    public Tween DisableDie(int dieIndex, float duration)
-    {
-        if (dieIndex < 0 || dieIndex >= diceRepresentation.Count) return null;
-        return diceRepresentation[dieIndex].Disable(duration);
-    }
-
-    public Sequence HideAllDice(float duration)
-    {
-        Sequence hideSeq = DOTween.Sequence();
-        foreach (var die in diceRepresentation)
-        {
-            hideSeq.Join(die.Hide(duration));
-        }
-        return hideSeq;
-    }
-
-    public void ResetRepresentations()
-    {
-        foreach (DieDisplay die in diceRepresentation)
-        {
-            die.Reset();
-        }
-    }
-
-    public ActorModel GetModel() => model;
 }

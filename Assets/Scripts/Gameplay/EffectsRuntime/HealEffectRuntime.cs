@@ -6,11 +6,12 @@ public class HealEffectRuntime : EffectRuntime
     public override void Execute(Actor self, Actor other)
     {
         self.UpdateHealth(heal);
-        EventsManager.Broadcast(new OnEffectVisualsTrigger
+        EventsManager.Broadcast(new OnCardEffect
         {
             effectType = CardEffectType.Heal,
             value = heal,
-            target = self
+            target = self,
+            targetType = CardEffectTarget.Self
         });
     }
 }

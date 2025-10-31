@@ -3,22 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public struct DieRoll
-{
-    public int value;
-    public int damage;
-}
-
 public class Battle : MonoBehaviour
 {
     [SerializeField] private int initalPlayersHealth = 10, drawCardsPerTurn = 3;
     [SerializeField] private StartingDeck testDeck;
 
-    private Actor p1 = null;
-    private Actor p2 = null;
+    private Actor p1 = null, p2 = null;
     private int turnIndex, picksThisTurn;
     private bool isVisualDirectorPlaying = false;
-    private List<DieRoll> turnResults;
 
     private Actor GetActiveActor() => (turnIndex == 0) ? p1 : p2;
     private Actor GetPassiveActor() => (turnIndex == 0) ? p2 : p1;
@@ -38,12 +30,12 @@ public class Battle : MonoBehaviour
     private void ResolveCardPlay(OnPlayCard evt)
     {
         Actor actor = GetActiveActor();
-
+        
         actor.Hand.Remove(evt.card);
         actor.Discard.Add(evt.card);
         evt.card.OnPlay(actor, GetPassiveActor());
 
-        EventsManager.Broadcast(new OnSendCardsToDiscard { cards = new(){evt.card}, ownerOrder = turnIndex });
+        EventsManager.Broadcast(new OnSendCardsToDiscard { cards = new() { evt.card }, ownerOrder = turnIndex });
     }
 
     private void ResolveDrawPick(OnPickDrawCard evt)
@@ -107,16 +99,6 @@ public class Battle : MonoBehaviour
     {
         isVisualDirectorPlaying = true;
 
-        // Broadcast event to start visual director
-        EventsManager.Broadcast(new OnTurnResolveBegin()
-        {
-            results = new List<DieRoll>(turnResults),
-            activeActor = GetActiveActor(),
-            passiveActor = GetPassiveActor()
-        });
-
-        turnResults.Clear();
-
         // Wait until turn result visuals are done playing
         yield return WaitVisualDirector();
 
@@ -164,12 +146,11 @@ public class Battle : MonoBehaviour
         EventsManager.RemoveSubscriber<OnTurnVisualsComplete>(OnVisualsComplete);
         EventsManager.RemoveSubscriber<OnPickDrawCard>(ResolveDrawPick);
         EventsManager.RemoveSubscriber<OnPlayCard>(ResolveCardPlay);
-    }
+}
 
     private void Start()
     {
         turnIndex = 0;
-        turnResults = new();
         
         p1 = new(turnIndex, initalPlayersHealth, false, testDeck);
         p2 = new(turnIndex + 1, initalPlayersHealth, true, testDeck);

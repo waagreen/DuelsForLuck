@@ -8,8 +8,15 @@ public enum CardEffectType
     Armor,
     Heal,
     Poison,
-    Rerolls,
+    Reroll,
     StoreEnergy
+}
+
+public enum CardEffectTarget
+{
+    Self,
+    Other,
+    Both
 }
 
 public class Actor

@@ -40,5 +40,7 @@ public class CardRuntime
         {
             effect.Execute(self, other);
         }
+
+        EventsManager.Broadcast(new OnAllEffectsApplied());
     }
 }

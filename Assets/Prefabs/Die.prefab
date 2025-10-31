@@ -640,11 +640,25 @@ MonoBehaviour:
   - {fileID: 6597760543527306638}
   - {fileID: 3708591688016280193}
   - {fileID: 1594016124261099751}
+  removeDuration: 0.1
+  selectDuration: 0.15
+  selectScale: 1.1
+  baseScale: 0.75
+  jumpPower: 1
+  jumpScale: 0.25
   audioScr: {fileID: 4082765509698050562}
   collisionSounds:
   - {fileID: 8300000, guid: 5f1298f2089599e44bb1ba799d0c04b0, type: 3}
   - {fileID: 8300000, guid: 203a0457769215642b3590ff8c7ee2a7, type: 3}
   - {fileID: 8300000, guid: e66fe06cfd1beb641bf1ab449d36404f, type: 3}
+  - {fileID: 8300000, guid: 130ae525ac0f1f141b97132295107ae2, type: 3}
+  - {fileID: 8300000, guid: a0c8f207efdb20e4c9e4f20d5594904a, type: 3}
+  - {fileID: 8300000, guid: 7121d228da4fd1e4797387bad4cea14f, type: 3}
+  - {fileID: 8300000, guid: 0b06506842ae8d042b6619923c3b022e, type: 3}
+  - {fileID: 8300000, guid: 2cefe4b43890358468112a4759c363da, type: 3}
+  - {fileID: 8300000, guid: c6357c0de87da39489bc63450f939684, type: 3}
+  - {fileID: 8300000, guid: ec5023e03719d454eb949bde133b5417, type: 3}
+  - {fileID: 8300000, guid: 0797da6296a77654a8630e695b277109, type: 3}
   minImpactVolume: 0
   impactCooldown: 0.15
 --- !u!1 &7542382216125838372

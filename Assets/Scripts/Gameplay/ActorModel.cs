@@ -5,10 +5,10 @@ using UnityEngine;
 public class ActorModel : MonoBehaviour
 {
     [SerializeField] private AudioSource audioScr;
+    [SerializeField] private List<AudioClip> clips;
     [SerializeField] private List<MeshRenderer> meshes;
 
     private List<Color> cachedColors;
-    private Sequence hurtSequence;
 
     private void Start()
     {
@@ -26,21 +26,32 @@ public class ActorModel : MonoBehaviour
         {
             MeshRenderer rend = meshes[i];
             Color original = cachedColors[i];
-            rend.material.DOColor(original, 0.05f);
+            rend.material.DOColor(original, 0.01f);
         }
+    }
+
+    public Tween Colorize(Color color)
+    {
+        Sequence colorizeSeq = DOTween.Sequence();
+        foreach (MeshRenderer rend in meshes)
+        {
+            colorizeSeq.Join(rend.material.DOColor(color, 0.05f).SetEase(Ease.OutExpo));
+        }
+        colorizeSeq.OnComplete(Restore);
+        return colorizeSeq;
     }
 
     public Tween Hurt()
     {
-        hurtSequence?.Kill();
-        hurtSequence = DOTween.Sequence();
-        hurtSequence.Append(transform.DOPunchScale(Vector3.one * 0.1f, 0.15f, vibrato: 3, elasticity: 0.3f));
-        hurtSequence.JoinCallback(audioScr.Play);
-        foreach (MeshRenderer rend in meshes)
-        {
-            hurtSequence.Join(rend.material.DOColor(Color.white, 0.05f).SetEase(Ease.Flash));
-        }
-        hurtSequence.OnComplete(Restore);
-        return hurtSequence;
+        return transform.DOPunchScale(Vector3.one * 0.1f, 0.15f, vibrato: 3, elasticity: 0.3f);
+    }
+
+    public void PlaySound(CardEffectType effectType)
+    {
+        int index = (int)effectType;
+        if (index < 0 || index > clips.Count) return;
+
+        audioScr.clip = clips[index];
+        audioScr.Play();
     }
 }

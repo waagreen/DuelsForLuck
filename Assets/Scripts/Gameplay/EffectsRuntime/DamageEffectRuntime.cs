@@ -6,11 +6,12 @@ public class DamageEffectRuntime : EffectRuntime
     public override void Execute(Actor self, Actor other)
     {
         other.UpdateHealth(-damage);
-        EventsManager.Broadcast(new OnEffectVisualsTrigger
+        EventsManager.Broadcast(new OnCardEffect
         {
             effectType = CardEffectType.Damage,
             value = -damage,
-            target = other
+            target = other,
+            targetType = CardEffectTarget.Other
         });
     }
 }

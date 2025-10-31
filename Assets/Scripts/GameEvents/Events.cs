@@ -47,11 +47,12 @@ public class OnCameraShake : GameEvent
     public int vibrato = 10;
     public float randomness = 90;
 }
-public class OnEffectVisualsTrigger : GameEvent
+public class OnCardEffect : GameEvent
 {
     public CardEffectType effectType;
     public int value;
     public Actor target;
+    public CardEffectTarget targetType;
 }
 #endregion
 
@@ -65,11 +66,5 @@ public class OnNextRound : GameEvent { }
 #region TURN
 public class OnTurnStart : ActorEvent { }
 public class OnTurnVisualsComplete : GameEvent { }
-
-public class OnTurnResolveBegin : GameEvent
-{
-    public List<DieRoll> results;
-    public Actor activeActor;
-    public Actor passiveActor;
-}
+public class OnAllEffectsApplied : GameEvent { }
 #endregion

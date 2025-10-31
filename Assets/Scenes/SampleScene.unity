@@ -568,6 +568,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioScr: {fileID: 213924338}
+  clips:
+  - {fileID: 8300000, guid: 748df331014052f499c91c2643ee64e7, type: 3}
+  - {fileID: 8300000, guid: 4698ddfcd51835944901711987edd328, type: 3}
+  - {fileID: 8300000, guid: 991601c3e151e2140a1e5ecee8a3ce91, type: 3}
+  - {fileID: 8300000, guid: 6a75bd13d1017c44f98b5de34b4c59c7, type: 3}
+  - {fileID: 8300000, guid: 3296401fdd8bf7844ba3425158032d08, type: 3}
+  - {fileID: 8300000, guid: ac12f6987fe7b9644a8aec9f4e0bb981, type: 3}
   meshes:
   - {fileID: 2134788277}
   - {fileID: 234777151}
@@ -926,6 +933,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioScr: {fileID: 314354210}
+  clips:
+  - {fileID: 8300000, guid: 748df331014052f499c91c2643ee64e7, type: 3}
+  - {fileID: 8300000, guid: 4698ddfcd51835944901711987edd328, type: 3}
+  - {fileID: 8300000, guid: 991601c3e151e2140a1e5ecee8a3ce91, type: 3}
+  - {fileID: 8300000, guid: 6a75bd13d1017c44f98b5de34b4c59c7, type: 3}
+  - {fileID: 8300000, guid: 3296401fdd8bf7844ba3425158032d08, type: 3}
+  - {fileID: 8300000, guid: ac12f6987fe7b9644a8aec9f4e0bb981, type: 3}
   meshes:
   - {fileID: 934073119}
   - {fileID: 1891961979}
@@ -3569,7 +3583,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initalPlayersHealth: 10
-  initialDiceAmount: 2
   drawCardsPerTurn: 3
   testDeck: {fileID: 11400000, guid: 4d20778022ca44441bc0b7a554add198, type: 2}
 --- !u!212 &1717655033 stripped

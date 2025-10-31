@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -8,28 +9,35 @@ public class BattleVisualDirector : MonoBehaviour
     [SerializeField] private OrbitCamera orbitCamera;
     [SerializeField] private BattleDisplay p1Display, p2Display;
 
-    private static readonly WaitForSeconds _waitForSeconds0_15 = new(0.15f);
-    private static readonly WaitForSeconds _waitForSeconds0_8 = new(0.8f);
-    private static readonly WaitForSeconds _waitForSeconds1_5 = new(1.5f);
+    private List<OnCardEffect> effectsToDisplay;
 
     private void Awake()
     {
+        effectsToDisplay = new();
+        
         EventsManager.AddSubscriber<OnTurnStart>(HandleTurnStartVisuals);
-        EventsManager.AddSubscriber<OnTurnResolveBegin>(HandleTurnResolveVisuals);
+        EventsManager.AddSubscriber<OnAllEffectsApplied>(HandleTurnResolveVisuals);
         EventsManager.AddSubscriber<OnRoundEnd>(HandleRoundEndVisuals);
+        EventsManager.AddSubscriber<OnCardEffect>(RegisterEffect);
     }
 
     private void OnDestroy()
     {
         EventsManager.AddSubscriber<OnTurnStart>(HandleTurnStartVisuals);
-        EventsManager.AddSubscriber<OnTurnResolveBegin>(HandleTurnResolveVisuals);
+        EventsManager.AddSubscriber<OnAllEffectsApplied>(HandleTurnResolveVisuals);
         EventsManager.AddSubscriber<OnRoundEnd>(HandleRoundEndVisuals);
+        EventsManager.RemoveSubscriber<OnCardEffect>(RegisterEffect);
+    }
+
+    private void RegisterEffect(OnCardEffect evt)
+    {
+        effectsToDisplay.Add(evt);
     }
 
     private void HandleTurnStartVisuals(OnTurnStart evt)
     {
         StartCoroutine(RunTurnStartSequence(evt.actor.Order));
-    } 
+    }
 
     private IEnumerator RunTurnStartSequence(int turnIndex)
     {
@@ -45,64 +53,54 @@ public class BattleVisualDirector : MonoBehaviour
 
         // Waits for the camera sequence to finish
         yield return turnSeq.WaitForCompletion();
-        
+
         EventsManager.Broadcast(new OnTurnVisualsComplete());
     }
 
-    private void HandleTurnResolveVisuals(OnTurnResolveBegin evt)
+    private void HandleTurnResolveVisuals(OnAllEffectsApplied evt)
     {
         StartCoroutine(RunTurnResolveVisuals(evt));
     }
 
-    private IEnumerator RunTurnResolveVisuals(OnTurnResolveBegin evt)
+    private IEnumerator RunTurnResolveVisuals(OnAllEffectsApplied evt)
     {
-        // Grab correct references
-        BattleDisplay activeDisplay = (evt.activeActor.Order == 0) ? p2Display : p1Display;
-        ActorModel damagedModel = activeDisplay.GetModel();
-        int passiveActorIndex = evt.passiveActor.Order;
-
-        // Turn camera to face the opponent
-        Sequence camSeq = DOTween.Sequence();
-        camSeq.Append(orbitCamera.AdjustViewAngle(0f, 0.6f).SetEase(Ease.OutBack));
-        camSeq.AppendInterval(0.5f);
-
-        // Wait for the camera finish turning
-        yield return camSeq.WaitForCompletion();
-
-        // Loop through dice results
-        for (int i = 0; i < evt.results.Count; i++)
+        foreach (OnCardEffect trigger in effectsToDisplay)
         {
-            DieRoll roll = evt.results[i];
-
-            // 3.1. Show die face
-            yield return activeDisplay.ShowDieFace(i, roll.value - 1, 0.2f).WaitForCompletion();
-
-            if (roll.value > 1) // Hit
+            bool isOtherTarget = trigger.targetType != CardEffectTarget.Self;
+            BattleDisplay battleDisplay = (trigger.target.Order == 0) ? p1Display : p2Display;
+            Debug.Log($"APPLYING EFFECT ON {trigger.targetType}");
+            if (isOtherTarget)
             {
-                EventsManager.Broadcast(new OnActorHealthChange { turnIndex = passiveActorIndex, dealtaHealth = -roll.damage });
-                damagedModel.Hurt(); // broadcast an event?
-                BroadcastCameraShake(0.1f, roll.damage);
+                // Turn camera to face the opponent
+                Sequence camSeq = DOTween.Sequence();
+                camSeq.AppendInterval(0.5f);
+                camSeq.Append(orbitCamera.AdjustViewAngle(0f, 0.6f).SetEase(Ease.OutBack));
+                camSeq.AppendInterval(0.5f);
 
-                yield return _waitForSeconds0_15;
-            }
-            else // Miss
-            {
-                yield return activeDisplay.DisableDie(i, 0.3f).WaitForCompletion();
+                // Wait for the camera finish turning
+                yield return camSeq.WaitForCompletion();
             }
 
-            // Pauses for legibility
-            yield return _waitForSeconds0_8;
+            Sequence effectSeq = DOTween.Sequence();
+            effectSeq.Append(battleDisplay.GetEffectSequence(trigger.effectType));
+            effectSeq.AppendInterval(0.5f);
+
+            yield return effectSeq.WaitForCompletion();
+
+            if (isOtherTarget)
+            {
+                // Turn camera to face the opponent
+                Sequence camSeq = DOTween.Sequence();
+                camSeq.Append(orbitCamera.AdjustViewAngle(45f, 0.6f).SetEase(Ease.OutBack));
+                camSeq.AppendInterval(0.5f);
+
+                // Wait for the camera finish turning
+                yield return camSeq.WaitForCompletion();
+            }
         }
+
+        effectsToDisplay.Clear();
         
-        // Pauses for legibility
-        yield return _waitForSeconds1_5;
-
-        // Hide all dice
-        yield return activeDisplay.HideAllDice(0.2f).WaitForCompletion();
-
-        // Resets all die representations
-        activeDisplay.ResetRepresentations();
-
         EventsManager.Broadcast(new OnTurnVisualsComplete());
     }
 
@@ -115,7 +113,7 @@ public class BattleVisualDirector : MonoBehaviour
     {
         yield return null;
     }
-    
+
     private void BroadcastCameraShake(float duration, int damage)
     {
         bool isCrit = damage > 1;
