@@ -70,10 +70,10 @@ public class Actor
         }
     }
 
-    public void UpdateHealth(int delta)
+    public void UpdateHealth(int delta, int turnIndex)
     {
         health = Mathf.Clamp(health + delta, 0, maxHealth);
-        EventsManager.Broadcast(new OnActorHealthChange { dealtaHealth = delta });
+        EventsManager.Broadcast(new OnActorHealthChange { dealtaHealth = delta, turnIndex = turnIndex});
     }
 
     public void ResetHealth()
@@ -117,6 +117,7 @@ public class Actor
     public void WinRound() => wins++;
 
     public int Health => health;
+    public int MaxHealth => maxHealth;
     public int Order => turnOrder;
     public int TurnPickAmount => turnDrawAmount;
     public bool IsBot => isBot;

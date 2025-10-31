@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -9,12 +8,6 @@ public class BattleDisplay : MonoBehaviour
     [SerializeField] private RectTransform diceHolder;
     [SerializeField] private ActorModel model;
     [SerializeField][Range(0, 1)] private int damageFrom;
-
-
-    private void Start()
-    {
-        
-    }
 
 
     private Sequence Damage()

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -6,86 +5,83 @@ using UnityEngine.UI;
 
 public class ActorStatsDisplay : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private TMP_Text healthText;
-    [SerializeField] private Image focusMask;
-    [SerializeField] private List<Image> winIndicators;
+    [SerializeField] private TMP_Text healthText, armorText;
+    [SerializeField] private Image healthFill, armorFill;
+    [SerializeField] private Transform armorIcon;
 
     [Header("Focus Settings")]
-    [SerializeField] private int ownerOrder;
-    [SerializeField][Min(0f)] private float focusedSize = 1.2f, unfocusedSize = 0.8f, focusTime = 1f;
+    [SerializeField] private int ownerOder;
 
-    private Sequence focusSeq, damageSeq, healSeq;
-    private int cachedHealth;
+    private Sequence healthSeq, armorSeq;
+    private int maxHealth, cachedHealth, cachedArmor;
 
-    private void UpdateDisplay(OnActorHealthChange evt)
+    private Sequence UpdateHealth(int dealtaHealth)
     {
-        if ((evt.turnIndex != null) && (evt.turnIndex.Value != ownerOrder)) return;
-
         int previousHealth = cachedHealth;
+        cachedHealth = Mathf.Clamp(cachedHealth + dealtaHealth, 0, dealtaHealth);
+
+        healthSeq?.Kill();
+        healthSeq = DOTween.Sequence();
         
-        cachedHealth += evt.dealtaHealth;
-        healthText.SetText(cachedHealth.ToString());
-
-        if (previousHealth > cachedHealth) TakenDamage();
-        else Healed();
-    }
-
-    private void TakenDamage()
-    {
-        damageSeq?.Kill();
-        damageSeq = DOTween.Sequence();
-        damageSeq.Append(ForceState(Vector3.one * focusedSize, 0f, 0.025f));
-        damageSeq.Append(ForceState(Vector3.one * unfocusedSize, 0.5f, 0.025f));
-        damageSeq.Play();
-    }
-    
-    private void Healed()
-    {
-        healSeq?.Kill();
-        healSeq = DOTween.Sequence();
-        // TODO: IMPLEMENT FOR HEALING DICES
-    }
-
-    private Sequence ForceState(Vector3 targetScale, float fadeValue, float duration)
-    {
-        Sequence sequence = DOTween.Sequence();
-        sequence.Append(transform.DOScale(targetScale, focusTime));
-        sequence.Join(focusMask.DOFade(fadeValue, duration));
-        sequence.SetEase(Ease.OutBack);
-        return sequence;
-    }
-
-    private void UpdateState(OnTurnStart evt)
-    {
-        bool isFocus = evt.actor.Order == ownerOrder;
-        Vector3 targetScale = (isFocus ? focusedSize : unfocusedSize) * Vector3.one;
-        float fadeValue = isFocus ? 0f : 0.5f;
+        float fillAmount = cachedHealth / maxHealth;
+        healthSeq.Append(healthFill.DOFillAmount(fillAmount, 0.5f).SetEase(Ease.OutQuad));
+        healthSeq.OnComplete(() => healthText.SetText($"{cachedHealth}/{maxHealth}"));
         
-        focusSeq?.Kill();
-        focusSeq = ForceState(targetScale, fadeValue, focusTime);
-        focusSeq.Play();
+        return healthSeq;
+    }
+
+    private Sequence UpdateArmor(int dealtaArmor)
+    {
+        int previousArmor = cachedArmor;
+        cachedArmor += dealtaArmor;
+
+        armorSeq?.Kill();
+        armorSeq = DOTween.Sequence();
+
+        float fillAmount = (float)cachedArmor / maxHealth;
+        if (previousArmor <= 0) armorSeq.Append(armorIcon.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack));
+        armorSeq.Append(armorFill.DOFillAmount(fillAmount, 0.5f).SetEase(Ease.OutQuad));
+        if (cachedArmor <= 0) armorSeq.Append(armorIcon.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InBack));
+        armorSeq.OnComplete(() => armorText.SetText($"{cachedArmor}"));
+        
+        return armorSeq;
     }
 
     private void Setup(OnCreateActor evt)
     {
-        if (evt.actor.Order != ownerOrder) return;
+        if (ownerOder != evt.actor.Order) return;
 
+        maxHealth = evt.actor.MaxHealth;
         cachedHealth = evt.actor.Health;
-        healthText.SetText(cachedHealth.ToString());
+        cachedArmor = evt.actor.GetStatus(CardEffectType.Armor);
+
+        healthText.SetText($"{cachedHealth}/{maxHealth}");
+        armorText.SetText(cachedArmor.ToString());
+
+        healthFill.fillAmount = cachedHealth / maxHealth;
+        armorFill.fillAmount = cachedArmor / maxHealth;
+
+        armorIcon.localScale = cachedArmor > 0 ? Vector3.one : Vector3.zero;
+    }
+    
+    public Sequence GetEffectSequence(CardEffectType type, int delta)
+    {
+        return type switch
+        {
+            CardEffectType.Damage => UpdateHealth(delta),
+            CardEffectType.Armor => UpdateArmor(delta),
+            CardEffectType.Heal => UpdateHealth(delta),
+            _ => null,
+        };
     }
 
     private void Awake()
     {
-        EventsManager.AddSubscriber<OnActorHealthChange>(UpdateDisplay);
-        EventsManager.AddSubscriber<OnTurnStart>(UpdateState);
         EventsManager.AddSubscriber<OnCreateActor>(Setup);
     }
 
     private void OnDestroy()
     {
-        EventsManager.RemoveSubscriber<OnActorHealthChange>(UpdateDisplay);
-        EventsManager.RemoveSubscriber<OnTurnStart>(UpdateState);
         EventsManager.RemoveSubscriber<OnCreateActor>(Setup);
     }
 }

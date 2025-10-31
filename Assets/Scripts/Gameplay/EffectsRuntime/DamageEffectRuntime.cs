@@ -5,7 +5,7 @@ public class DamageEffectRuntime : EffectRuntime
     public int damage;
     public override void Execute(Actor self, Actor other)
     {
-        other.UpdateHealth(-damage);
+        other.UpdateHealth(-damage, self.Order);
         EventsManager.Broadcast(new OnCardEffect
         {
             effectType = CardEffectType.Damage,

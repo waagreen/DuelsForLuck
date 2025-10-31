@@ -7,7 +7,8 @@ public class BattleVisualDirector : MonoBehaviour
 {
     [Header("Scene References")]
     [SerializeField] private OrbitCamera orbitCamera;
-    [SerializeField] private BattleDisplay p1Display, p2Display;
+    [SerializeField] private BattleDisplay p1BattleDisplay, p2BattleDisplay;
+    [SerializeField] private ActorStatsDisplay p1StatsDisplay, p2StatsDisplay;
 
     private List<OnCardEffect> effectsToDisplay;
 
@@ -67,35 +68,26 @@ public class BattleVisualDirector : MonoBehaviour
         foreach (OnCardEffect trigger in effectsToDisplay)
         {
             bool isOtherTarget = trigger.targetType != CardEffectTarget.Self;
-            BattleDisplay battleDisplay = (trigger.target.Order == 0) ? p1Display : p2Display;
-            Debug.Log($"APPLYING EFFECT ON {trigger.targetType}");
+            bool isTargetFirst = trigger.target.Order == 0;
+            BattleDisplay battleDisplay = isTargetFirst ? p1BattleDisplay : p2BattleDisplay;
+            ActorStatsDisplay statsDisplay = isTargetFirst ? p1StatsDisplay : p2StatsDisplay;
+
             if (isOtherTarget)
             {
-                // Turn camera to face the opponent
-                Sequence camSeq = DOTween.Sequence();
-                camSeq.AppendInterval(0.5f);
-                camSeq.Append(orbitCamera.AdjustViewAngle(0f, 0.6f).SetEase(Ease.OutBack));
-                camSeq.AppendInterval(0.5f);
-
-                // Wait for the camera finish turning
-                yield return camSeq.WaitForCompletion();
+                // Pitch camera to face the opponent
+                yield return PitchCamera(0f, 0.6f, 0.5f).WaitForCompletion();
             }
 
             Sequence effectSeq = DOTween.Sequence();
             effectSeq.Append(battleDisplay.GetEffectSequence(trigger.effectType));
+            effectSeq.Append(statsDisplay.GetEffectSequence(trigger.effectType, trigger.value));
             effectSeq.AppendInterval(0.5f);
-
             yield return effectSeq.WaitForCompletion();
 
             if (isOtherTarget)
             {
-                // Turn camera to face the opponent
-                Sequence camSeq = DOTween.Sequence();
-                camSeq.Append(orbitCamera.AdjustViewAngle(45f, 0.6f).SetEase(Ease.OutBack));
-                camSeq.AppendInterval(0.5f);
-
-                // Wait for the camera finish turning
-                yield return camSeq.WaitForCompletion();
+                // Pitch camera to face the table
+                yield return PitchCamera(45f, 0.6f).WaitForCompletion();
             }
         }
 
@@ -126,5 +118,14 @@ public class BattleVisualDirector : MonoBehaviour
         };
 
         EventsManager.Broadcast(shake);
+    }
+
+    private Sequence PitchCamera(float angle, float duration, float intervalPre = 0f, float intervalPost = 0f)
+    { 
+        Sequence camSeq = DOTween.Sequence();
+        camSeq.AppendInterval(intervalPre);
+        camSeq.Append(orbitCamera.AdjustViewAngle(angle, duration).SetEase(Ease.OutBack));
+        camSeq.AppendInterval(intervalPost);
+        return camSeq;
     }
 }
