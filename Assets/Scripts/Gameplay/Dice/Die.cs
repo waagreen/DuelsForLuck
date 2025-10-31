@@ -6,7 +6,7 @@ using UnityEngine;
 public class Die : MonoBehaviour
 {
     [Header("Visual Settings")]
-    [SerializeField] private List<SpriteRenderer> faces;
+    [SerializeField] private MeshRenderer mesh;
     [SerializeField][Min(0f)] private float removeDuration = 0.1f, selectDuration = 0.15f;
     [SerializeField][Min(0f)] private float selectScale = 1.1f, baseScale = 0.75f;
     [SerializeField][Min(0f)] private float jumpPower = 1f, jumpScale = 0.25f;
@@ -31,12 +31,12 @@ public class Die : MonoBehaviour
     
     private readonly Vector3[] faceNormals = new Vector3[]
     {
-        Vector3.up,
+        Vector3.down,
         Vector3.left,
         Vector3.back,
         Vector3.forward,
         Vector3.right,
-        Vector3.down
+        Vector3.up
     };
 
     public Rigidbody Rb => rb;
@@ -128,10 +128,7 @@ public class Die : MonoBehaviour
         colorSeq?.Kill();
         colorSeq = DOTween.Sequence();
 
-        foreach (SpriteRenderer rend in faces)
-        {
-            colorSeq.Join(rend.DOColor(colr, 0.2f));
-        }
+        colorSeq.Join(mesh.material.DOColor(colr, 0.2f));
         colorSeq.SetEase(Ease.OutCubic);
 
         return colorSeq;
@@ -196,7 +193,7 @@ public class Die : MonoBehaviour
         if (wasThrown && (rb.linearVelocity == Vector3.zero))
         {
             value = GetTopFace();
-            
+            Debug.Log($"Topface {value}");
             wasThrown = false;
             hasValue = true;
         }
