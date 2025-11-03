@@ -1587,7 +1587,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2837149702209938810, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2837149702209938810, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2396,10 +2396,10 @@ MonoBehaviour:
   - {fileID: 2092434524}
   - {fileID: 1931093855}
   - {fileID: 545842223}
-  radius: 1.2
-  power: 6
-  upwardsModifier: 0.58
-  maxRollTorque: 0.94
+  radius: 0.7
+  power: 4.8
+  upwardsModifier: 3.8
+  maxRollTorque: 0.88
 --- !u!1 &861954086
 GameObject:
   m_ObjectHideFlags: 0
@@ -3274,7 +3274,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2837149702209938810, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2837149702209938810, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3314,7 +3314,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6977981156456425491, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: m_Name
-      value: Dice2 (1)
+      value: Dice3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4798,7 +4798,7 @@ PrefabInstance:
     - target: {fileID: 7524231424446142641, guid: 723fa3b8d708eff4d8c3efadee8a7bfd, type: 3}
       propertyPath: model
       value: 
-      objectReference: {fileID: 314354209}
+      objectReference: {fileID: 213924337}
     - target: {fileID: 7524231424446142641, guid: 723fa3b8d708eff4d8c3efadee8a7bfd, type: 3}
       propertyPath: damageFrom
       value: 1
@@ -4959,7 +4959,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2837149702209938810, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2837149702209938810, guid: 83a85686b5aa08a489c708dabc7c9f56, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5097,7 +5097,7 @@ PrefabInstance:
     - target: {fileID: 7524231424446142641, guid: 723fa3b8d708eff4d8c3efadee8a7bfd, type: 3}
       propertyPath: model
       value: 
-      objectReference: {fileID: 213924337}
+      objectReference: {fileID: 314354209}
     - target: {fileID: 7524231424446142641, guid: 723fa3b8d708eff4d8c3efadee8a7bfd, type: 3}
       propertyPath: damageFrom
       value: 0

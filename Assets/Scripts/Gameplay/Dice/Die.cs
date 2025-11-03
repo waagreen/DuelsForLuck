@@ -139,11 +139,9 @@ public class Die : MonoBehaviour
         wasThrown = true;
         rb.useGravity = true;
 
-        Vector3 aditionalAxis = (Random.Range(0f, 1f) > 0.5f) ? transform.right : transform.up;
-        Vector3 torque = maxRollTorque * (transform.forward + aditionalAxis);
-
+        float aditionalAxis = (Random.Range(0f, 1f) > 0.5f) ? 1f : -1f;
+        Vector3 torque = maxRollTorque * (transform.forward + transform.right * aditionalAxis);
         rb.AddTorque(torque, ForceMode.Impulse);
-        rb.AddForce(rb.linearVelocity * 0.5f, ForceMode.Impulse);
     }
 
     private int GetTopFace()
@@ -193,7 +191,6 @@ public class Die : MonoBehaviour
         if (wasThrown && (rb.linearVelocity == Vector3.zero))
         {
             value = GetTopFace();
-            Debug.Log($"Topface {value}");
             wasThrown = false;
             hasValue = true;
         }

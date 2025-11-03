@@ -5,9 +5,7 @@ public class BattleDisplay : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Canvas display;
-    [SerializeField] private RectTransform diceHolder;
     [SerializeField] private ActorModel model;
-    [SerializeField][Range(0, 1)] private int damageFrom;
 
 
     private Sequence Damage()
